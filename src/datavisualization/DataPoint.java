@@ -16,4 +16,16 @@ class DataPoint {
         return "Province: " + province + ", Year: " + year + ", Crime index: " + crimeIndex;
     }
 
+    public String getProvince() {
+        return province;
+    }
+
+    public int getYear() {
+        return year;
+    }
+
+    public double getCrimeIndex() {
+        return crimeIndex;
+    }
+
 }
