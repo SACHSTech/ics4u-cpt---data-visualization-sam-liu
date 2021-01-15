@@ -1,11 +1,11 @@
 package datavisualization;
 
 import java.io.*;
-import java.util.*;
 
 import javafx.application.Application;
 import javafx.collections.ObservableList;
 import javafx.collections.FXCollections;
+import javafx.collections.transformation.FilteredList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.stage.Stage;
@@ -13,14 +13,23 @@ import javafx.scene.Scene;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.Button;
 import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.layout.VBox;
 
 public class DataVisualization extends Application {
 
     // Instance variables
+    private VBox vBox = new VBox(10);
+
     private TableView<DataPoint> tableView;
+    private TableColumn<DataPoint, String> provinceCol;
+    private TableColumn<DataPoint, Integer> yearCol;
+    private TableColumn<DataPoint, Double> crimeCol;
     private DataSet wholeDataSet;
     private ObservableList<DataPoint> dataSource;
+
+	private TextField filterField;
 
     public static void main(String args[]) {
         launch(args);
@@ -32,10 +41,11 @@ public class DataVisualization extends Application {
     public void start(Stage primaryStage) throws IOException {
         primaryStage.setTitle("Crime index over time");
 
-        // Declare variables
-        TableColumn<DataPoint, String> provinceCol;
-        TableColumn<DataPoint, Integer> yearCol;
-        TableColumn<DataPoint, Double> crimeCol;
+        // Create filter field
+        filterField = new TextField();
+        filterField.textProperty().addListener((observable, oldValue, newValue) -> {
+			System.out.println("hello");
+		});
 
         // Set properties for table columns
         provinceCol = new TableColumn<>("Province");
@@ -63,8 +73,10 @@ public class DataVisualization extends Application {
             }
         });
         
+        vBox.getChildren().addAll(filterField, tableView);
+
         // Create and set scene
-        Scene scene = new Scene(tableView, 600, 600);
+        Scene scene = new Scene(vBox, 600, 600);
         primaryStage.setScene(scene);
 
         primaryStage.show();
@@ -97,6 +109,14 @@ public class DataVisualization extends Application {
 
         return temporaryList;
 
+    }
+
+    private void createFilter() {
+		
+		filterField.textProperty().addListener((observable, oldValue, newValue) -> {
+			dataSource = 
+		});
+        
     }
 
 }
