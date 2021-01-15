@@ -46,12 +46,12 @@ public class DataSet {
             if (!isNumeric(key) && data.getProvince().contains(key)) {
                 tempList.add(data);
             }
-            if (isNumeric(key) && (data.getYear() == Double.parseDouble(key) || data.getCrimeIndex() == Double.parseDouble(key)))
+            if (isNumeric(key) && (data.getYear() == Double.parseDouble(key) || data.getCrimeIndex() == Double.parseDouble(key))) {
                 tempList.add(data);
             }
         }
 
-        searched = new DataSet
+        searched = new DataSet(tempList);
 
         return searched;
     }
