@@ -4,23 +4,23 @@ import java.io.*;
 import java.util.*;
 
 import javafx.application.Application;
+import javafx.collections.ObservableList;
+import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.stage.Stage;
 import javafx.scene.Scene;
-import javafx.scene.control.Label;
-import javafx.scene.control.ScrollPane;
+import javafx.scene.control.TableColumn;
 import javafx.scene.control.Button;
-import javafx.scene.layout.GridPane;
-import javafx.geometry.Pos;
-import javafx.geometry.Insets;
+import javafx.scene.control.TableView;
+import javafx.scene.control.cell.PropertyValueFactory;
 
 public class DataVisualization extends Application {
 
     // Instance variables
-    private ScrollPane scrollPane;
-    private GridPane grid;
+    private TableView<DataPoint> tableView;
     private DataSet wholeDataSet;
+    private ObservableList<DataPoint> dataSource;
 
     public static void main(String args[]) {
         launch(args);
@@ -32,36 +32,27 @@ public class DataVisualization extends Application {
     public void start(Stage primaryStage) throws IOException {
         primaryStage.setTitle("Crime index over time");
 
-        // Initialize variables
-        scrollPane = new ScrollPane();
-        grid = new GridPane();
-        scrollPane.setContent(grid);
+        // Declare variables
+        TableColumn<DataPoint, String> provinceCol;
+        TableColumn<DataPoint, Integer> yearCol;
+        TableColumn<DataPoint, Double> crimeCol;
 
-        wholeDataSet = new DataSet(importData());
-        wholeDataSet = wholeDataSet.search("31");
+        // Set properties for table columns
+        provinceCol = new TableColumn<>("Province");
+        provinceCol.setCellValueFactory(new PropertyValueFactory<>("province"));
 
-        // Constraints
-        grid.setAlignment(Pos.CENTER);
-        grid.setHgap(10);
-        grid.setVgap(10);
-        grid.setPadding(new Insets(25, 25, 25, 25));
-        grid.setGridLinesVisible(true);
-        
-        for (int i = 0; i < wholeDataSet.getSize(); ++i) {
-            DataPoint data = wholeDataSet.getDataPoints().get(i);
+        yearCol = new TableColumn<>("Year");
+        yearCol.setCellValueFactory(new PropertyValueFactory<>("year"));
 
-            // Province label
-            Label province = new Label(data.getProvince());
-            grid.add(province, 0, i);
+        crimeCol = new TableColumn<>("Crime index");
+        crimeCol.setCellValueFactory(new PropertyValueFactory<>("crimeIndex"));
 
-            // Year label
-            Label year = new Label(String.valueOf(data.getYear()));
-            grid.add(year, 1, i);
+        // Add columns to table view
+        tableView = new TableView<>();
+        tableView.getColumns().addAll(provinceCol, yearCol, crimeCol);
 
-            // Crime index label
-            Label crimeIndex = new Label(String.valueOf(data.getCrimeIndex()));
-            grid.add(crimeIndex, 2, i);
-        }
+        dataSource = importData();
+        tableView.setItems(dataSource);
 
         Button sortCrimeButton = new Button("Sort by crime index");
         sortCrimeButton.setOnAction(new EventHandler<ActionEvent>() {
@@ -71,24 +62,22 @@ public class DataVisualization extends Application {
                 wholeDataSet.sort("year", false);
             }
         });
-
-        grid.add(sortCrimeButton, 4, 0);
         
         // Create and set scene
-        Scene scene = new Scene(scrollPane, 600, 600);
+        Scene scene = new Scene(tableView, 600, 600);
         primaryStage.setScene(scene);
 
         primaryStage.show();
     }
 
-    private static ArrayList<DataPoint> importData() throws IOException {
+    private static ObservableList<DataPoint> importData() throws IOException {
         
         BufferedReader file = new BufferedReader(new FileReader("data.csv"));
 
-        ArrayList<DataPoint> temporaryList;
+        ObservableList<DataPoint> temporaryList;
         String strLine;
 
-        temporaryList = new ArrayList<DataPoint>();
+        temporaryList = FXCollections.observableArrayList();
         // Reads first line of csv file (e.g. headings)
         strLine = file.readLine();
 

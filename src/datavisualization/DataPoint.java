@@ -1,10 +1,10 @@
 package datavisualization;
 
-class DataPoint {
+public class DataPoint {
 
-    String province;
-    int year;
-    double crimeIndex;
+    private String province;
+    private int year;
+    private double crimeIndex;
 
     DataPoint(String province, int year, double crimeIndex) {
         this.province = province;
