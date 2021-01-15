@@ -5,7 +5,6 @@ import java.io.*;
 import javafx.application.Application;
 import javafx.collections.ObservableList;
 import javafx.collections.FXCollections;
-import javafx.collections.transformation.FilteredList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.stage.Stage;
@@ -27,7 +26,6 @@ public class DataVisualization extends Application {
     private TableColumn<DataPoint, Integer> yearCol;
     private TableColumn<DataPoint, Double> crimeCol;
     private DataSet wholeDataSet;
-    private ObservableList<DataPoint> dataSource;
 
 	private TextField filterField;
 
@@ -43,9 +41,6 @@ public class DataVisualization extends Application {
 
         // Create filter field
         filterField = new TextField();
-        filterField.textProperty().addListener((observable, oldValue, newValue) -> {
-			System.out.println("hello");
-		});
 
         // Set properties for table columns
         provinceCol = new TableColumn<>("Province");
@@ -61,8 +56,17 @@ public class DataVisualization extends Application {
         tableView = new TableView<>();
         tableView.getColumns().addAll(provinceCol, yearCol, crimeCol);
 
-        dataSource = importData();
-        tableView.setItems(dataSource);
+        wholeDataSet = new DataSet(importData());
+        tableView.setItems(wholeDataSet.getDataPoints());
+
+        filterField.textProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue == null || newValue.isEmpty()) {
+                tableView.setItems(wholeDataSet.getDataPoints());
+            }
+            else {
+                tableView.setItems(wholeDataSet.search(newValue));
+            }
+		});
 
         Button sortCrimeButton = new Button("Sort by crime index");
         sortCrimeButton.setOnAction(new EventHandler<ActionEvent>() {
@@ -109,14 +113,6 @@ public class DataVisualization extends Application {
 
         return temporaryList;
 
-    }
-
-    private void createFilter() {
-		
-		filterField.textProperty().addListener((observable, oldValue, newValue) -> {
-			dataSource = 
-		});
-        
     }
 
 }

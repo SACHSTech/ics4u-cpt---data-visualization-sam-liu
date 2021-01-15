@@ -1,24 +1,20 @@
 package datavisualization;
 
 import java.util.*;
+import javafx.collections.ObservableList;
+import javafx.collections.FXCollections;
 
 public class DataSet {
     
-    private ArrayList<DataPoint> dataPoints;
+    private ObservableList<DataPoint> dataPoints;
     private int size;
 
-    public DataSet(ArrayList<DataPoint> dataPoints) {
+    public DataSet(ObservableList<DataPoint> dataPoints) {
         this.dataPoints = dataPoints;
         this.size = dataPoints.size();
     }
 
-    public void print() {
-        for (DataPoint data: dataPoints) {
-            System.out.println(data);
-        }
-    }
-
-    public ArrayList<DataPoint> getDataPoints() {
+    public ObservableList<DataPoint> getDataPoints() {
         return dataPoints;
     }
 
@@ -34,12 +30,11 @@ public class DataSet {
         mergeSort(new ArrayList<DataPoint>(dataPoints), 0, size - 1, sortBy, reverse);
     }
 
-    public DataSet search(String key) {
+    public ObservableList<DataPoint> search(String key) {
         key = key.toLowerCase();
-        ArrayList<DataPoint> tempList;
-        DataSet searched;
+        ObservableList<DataPoint> tempList;
 
-        tempList = new ArrayList<DataPoint>();
+        tempList = FXCollections.observableArrayList();
 
         for (DataPoint data: dataPoints) {
             if (data.getProvince().toLowerCase().contains(key)) {
@@ -53,9 +48,7 @@ public class DataSet {
             }
         }
 
-        searched = new DataSet(tempList);
-
-        return searched;
+        return tempList;
     }
 
     private void mergeSort(ArrayList<DataPoint> temporaryList, int from, int to, String sortBy, boolean reverse) {
