@@ -12,6 +12,12 @@ public class DataSet {
         this.size = dataPoints.size();
     }
 
+    public void print() {
+        for (DataPoint data: dataPoints) {
+            System.out.println(data);
+        }
+    }
+
     public ArrayList<DataPoint> getDataPoints() {
         return dataPoints;
     }
@@ -24,29 +30,25 @@ public class DataSet {
         dataPoints.add(data);
     }
 
-    /*
-    private void print() {
-        for (DataPoint data: dataPoints) {
-            System.out.println(data);
-        }
-    }
-    */
-
     public void sort(String sortBy, boolean reverse) {
         mergeSort(new ArrayList<DataPoint>(dataPoints), 0, size - 1, sortBy, reverse);
     }
 
     public DataSet search(String key) {
+        key = key.toLowerCase();
         ArrayList<DataPoint> tempList;
         DataSet searched;
 
         tempList = new ArrayList<DataPoint>();
 
         for (DataPoint data: dataPoints) {
-            if (!isNumeric(key) && data.getProvince().contains(key)) {
+            if (data.getProvince().toLowerCase().contains(key)) {
                 tempList.add(data);
             }
-            if (isNumeric(key) && (data.getYear() == Double.parseDouble(key) || data.getCrimeIndex() == Double.parseDouble(key))) {
+            else if (String.valueOf(data.getYear()).toLowerCase().contains(key)) {
+                tempList.add(data);
+            }
+            else if (String.valueOf(data.getCrimeIndex()).toLowerCase().contains(key)) {
                 tempList.add(data);
             }
         }
@@ -54,16 +56,6 @@ public class DataSet {
         searched = new DataSet(tempList);
 
         return searched;
-    }
-
-    private boolean isNumeric(String key) {
-        try {
-            Double.parseDouble(key);
-            return true;
-        }
-        catch (NumberFormatException e) {
-            return false;
-        }
     }
 
     private void mergeSort(ArrayList<DataPoint> temporaryList, int from, int to, String sortBy, boolean reverse) {

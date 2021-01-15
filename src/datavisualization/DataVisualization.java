@@ -38,6 +38,7 @@ public class DataVisualization extends Application {
         scrollPane.setContent(grid);
 
         wholeDataSet = new DataSet(importData());
+        wholeDataSet = wholeDataSet.search("31");
 
         // Constraints
         grid.setAlignment(Pos.CENTER);
@@ -66,7 +67,7 @@ public class DataVisualization extends Application {
         sortCrimeButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent e) {
-                System.out.println("test");
+                // Sort the data set
                 wholeDataSet.sort("year", false);
             }
         });
