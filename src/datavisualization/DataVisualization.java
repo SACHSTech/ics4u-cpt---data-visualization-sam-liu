@@ -72,7 +72,12 @@ public class DataVisualization extends Application {
         tableView.getColumns().addAll(provinceCol, yearCol, crimeCol);
         tableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
 
-        crimeCol.prefWidthProperty().bind(tableView.widthProperty().multiply(0.5));
+        provinceCol.prefWidthProperty().bind(tableView.widthProperty().multiply(0.48));
+        provinceCol.setResizable(false);
+        yearCol.prefWidthProperty().bind(tableView.widthProperty().multiply(0.23));
+        yearCol.setResizable(false);
+        crimeCol.prefWidthProperty().bind(tableView.widthProperty().multiply(0.23));
+        crimeCol.setResizable(false);
 
         // Initially add all data points into the table view
         wholeDataSet = new DataSet(importData());
