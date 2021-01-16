@@ -1,11 +1,11 @@
 package datavisualization;
 
 import java.io.*;
+import java.util.*;
 
 import javafx.application.Application;
 import javafx.collections.ObservableList;
 import javafx.collections.FXCollections;
-import javafx.event.ActionEvent;
 import javafx.scene.Scene;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
@@ -25,13 +25,23 @@ public class DataVisualization extends Application {
 
     private TableView<DataPoint> tableView;
     private TableView<DataPoint> singleTable;
+    private TableView<SummaryData> summaryInformation;
+
     private TableColumn<DataPoint, String> provinceCol;
     private TableColumn<DataPoint, Integer> yearCol;
     private TableColumn<DataPoint, Double> crimeCol;
     private TableColumn<DataPoint, String> provinceColCopy;
     private TableColumn<DataPoint, Integer> yearColCopy;
     private TableColumn<DataPoint, Double> crimeColCopy;
+    private TableColumn<SummaryData, Integer> countCol;
+    private TableColumn<SummaryData, Double> maxCol;
+    private TableColumn<SummaryData, Double> minCol;
+    private TableColumn<SummaryData, Double> meanCol;
+    private TableColumn<SummaryData, Double> medianCol;
+    private TableColumn<SummaryData, Double> standardDeviationCol;
+
     private DataSet wholeDataSet;
+    private SummaryData summaryData;
     private Stage popUp;
 
     private ComboBox<String> filterList;
@@ -60,6 +70,9 @@ public class DataVisualization extends Application {
         // Add columns to table view
         tableView = new TableView<>();
         tableView.getColumns().addAll(provinceCol, yearCol, crimeCol);
+        tableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+
+        crimeCol.prefWidthProperty().bind(tableView.widthProperty().multiply(0.5));
 
         // Initially add all data points into the table view
         wholeDataSet = new DataSet(importData());
@@ -90,12 +103,6 @@ public class DataVisualization extends Application {
                 tableView.setItems(wholeDataSet.search(userSelection));
             }
         });
-        
-        /*
-        tableView.setOnSort(event -> {
-            System.out.println("hi");
-        });
-        */
 
         tableView.setRowFactory( tv -> {
 
@@ -117,8 +124,9 @@ public class DataVisualization extends Application {
                     singleTable = new TableView<>();
                     singleTable.getColumns().addAll(provinceColCopy, yearColCopy, crimeColCopy);
                     singleTable.getItems().add(row.getItem());
+                    singleTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
 
-                    Scene singleScene = new Scene(singleTable, 400, 300);
+                    Scene singleScene = new Scene(singleTable, 400, 60);
                     popUp.setScene(singleScene);
                     popUp.show();
 
@@ -138,15 +146,39 @@ public class DataVisualization extends Application {
             else {
                 tableView.setItems(wholeDataSet.search(newValue));
             }
-		});
+        });
+        
+        countCol = new TableColumn<>("Count");
+        countCol.setCellValueFactory(new PropertyValueFactory<>("count"));
+        maxCol = new TableColumn<>("Max");
+        maxCol.setCellValueFactory(new PropertyValueFactory<>("max"));
+        minCol = new TableColumn<>("Min");
+        minCol.setCellValueFactory(new PropertyValueFactory<>("min"));
+        meanCol = new TableColumn<>("μ");
+        meanCol.setCellValueFactory(new PropertyValueFactory<>("mean"));
+        medianCol = new TableColumn<>("Median");
+        medianCol.setCellValueFactory(new PropertyValueFactory<>("median"));
+        standardDeviationCol = new TableColumn<>("σ");
+        standardDeviationCol.setCellValueFactory(new PropertyValueFactory<>("standardDeviation"));
+
+        summaryInformation = new TableView<>();
+        summaryInformation.getColumns().addAll(countCol, maxCol, minCol, meanCol, medianCol, standardDeviationCol);
+        summaryInformation.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        ArrayList<Double> crimeIndices;
+        crimeIndices = new ArrayList<>();
+        for (int i = 0; i < wholeDataSet.getSize(); ++i) {
+            crimeIndices.add(wholeDataSet.getDataPoints().get(i).getCrimeIndex());
+        }
+        summaryData = new SummaryData(crimeIndices);
+        summaryInformation.getItems().add(summaryData);
         
         // Add text field and filter list into horizontal box
         hBox.getChildren().addAll(filterField, filterList);
         // Add text field and table view into a vertical box
-        vBox.getChildren().addAll(hBox, tableView);
+        vBox.getChildren().addAll(hBox, tableView, summaryInformation);
 
         // Create and set scene
-        Scene scene = new Scene(vBox, 400, 500);
+        Scene scene = new Scene(vBox, 400, 400);
         primaryStage.setScene(scene);
         primaryStage.show();
     }
