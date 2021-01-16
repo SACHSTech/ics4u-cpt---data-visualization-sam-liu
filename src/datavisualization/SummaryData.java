@@ -16,7 +16,7 @@ public class SummaryData {
 
     public SummaryData(ObservableList<Double> crimeIndices) {
         this.crimeIndices = crimeIndices;
-        calculate();
+        computeSummary();
     }
 
     public int getCount() {
@@ -43,7 +43,16 @@ public class SummaryData {
         return standardDeviation;
     }
 
-    private void calculate() {
+    public SummaryData newSummary(ObservableList<Double> crimeIndices) {
+        SummaryData newSummary;
+
+        newSummary = new SummaryData(crimeIndices);
+        newSummary.computeSummary();
+
+        return newSummary;
+    }
+
+    public void computeSummary() {
         count = crimeIndices.size();
         sort();
         max = crimeIndices.get(count - 1);

@@ -25,7 +25,7 @@ public class DataVisualization extends Application {
 
     private TableView<DataPoint> tableView;
     private TableView<DataPoint> singleTable;
-    private TableView<SummaryData> summaryInformation;
+    private TableView<SummaryData> summaryTable;
 
     private TableColumn<DataPoint, String> provinceCol;
     private TableColumn<DataPoint, Integer> yearCol;
@@ -42,15 +42,15 @@ public class DataVisualization extends Application {
 
     private DataSet wholeDataSet;
     private SummaryData summaryData;
-    private Stage popUp;
     private ComboBox<String> filterList;
-	private TextField filterField;
+    private TextField filterField;
+    private Stage popUp;
+    private Scene mainScene;
+    private Scene popUpScene;
 
     public static void main(String args[]) {
         launch(args);
     }
-
-    // TECHNICALLY, ALL VARIABLES SHOULD BE DECLARED AT THE TOP OF THE METHOD
 
     @Override
     public void start(Stage primaryStage) throws IOException {
@@ -62,7 +62,7 @@ public class DataVisualization extends Application {
 
         tableView = new TableView<>();
         singleTable = new TableView<>();
-        summaryInformation = new TableView<>();
+        summaryTable = new TableView<>();
 
         provinceCol = new TableColumn<>("Province");
         yearCol = new TableColumn<>("Year");
@@ -78,10 +78,12 @@ public class DataVisualization extends Application {
         standardDeviationCol = new TableColumn<>("σ");
 
         wholeDataSet = new DataSet(importData());
-        summaryData = new SummaryData(wholeDataSet.allCrimeIndices());
-        popUp = new Stage();
+        summaryData = new SummaryData(wholeDataSet.allCrimeIndices(wholeDataSet.getDataPoints()));
         filterList = new ComboBox<>();
         filterField = new TextField();
+        popUp = new Stage();
+        mainScene = new Scene(vBox, 400, 400);
+        popUpScene = new Scene(singleTable, 400, 60);
 
         // Initialize table view columns
         provinceCol.setCellValueFactory(new PropertyValueFactory<>("province"));
@@ -99,7 +101,7 @@ public class DataVisualization extends Application {
         medianCol.setCellValueFactory(new PropertyValueFactory<>("median"));
         standardDeviationCol.setCellValueFactory(new PropertyValueFactory<>("standardDeviation"));
 
-        // Fix width of province, year, and crime columns in tableView
+        // Fix width of columns
         provinceCol.prefWidthProperty().bind(tableView.widthProperty().multiply(0.48));
         provinceCol.setResizable(false);
         yearCol.prefWidthProperty().bind(tableView.widthProperty().multiply(0.23));
@@ -107,19 +109,34 @@ public class DataVisualization extends Application {
         crimeCol.prefWidthProperty().bind(tableView.widthProperty().multiply(0.23));
         crimeCol.setResizable(false);
 
+        provinceColCopy.prefWidthProperty().bind(singleTable.widthProperty().multiply(0.48));
+        provinceColCopy.setResizable(false);
+        yearColCopy.prefWidthProperty().bind(singleTable.widthProperty().multiply(0.23));
+        yearColCopy.setResizable(false);
+        crimeColCopy.prefWidthProperty().bind(singleTable.widthProperty().multiply(0.23));
+        crimeColCopy.setResizable(false);
+
         // Add columns to respective table views
         tableView.getColumns().addAll(provinceCol, yearCol, crimeCol);
         singleTable.getColumns().addAll(provinceColCopy, yearColCopy, crimeColCopy);
-        summaryInformation.getColumns().addAll(countCol, maxCol, minCol, meanCol, medianCol, standardDeviationCol);
+        summaryTable.getColumns().addAll(countCol, maxCol, minCol, meanCol, medianCol, standardDeviationCol);
 
         // Remove default additional column of table view
         tableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         singleTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
-        summaryInformation.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        summaryTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
 
-
-        // Initially add all data points into the table view
+        // Set default items to table views
         tableView.setItems(wholeDataSet.getDataPoints());
+        summaryTable.getItems().add(summaryData);
+
+        // Place nodes into horizontal and vertical box
+        hBox.getChildren().addAll(filterField, filterList);
+        vBox.getChildren().addAll(hBox, tableView, summaryTable);
+
+        // Configure popup stage
+        popUp.setTitle("Data value");
+        popUp.setScene(popUpScene);
 
         // Create list of filters
         filterList.getItems().addAll(
@@ -136,30 +153,32 @@ public class DataVisualization extends Application {
             "British Columbia"
         );
         
+        // Detect if the user has clicked on a filter
         filterList.getSelectionModel().selectedItemProperty().addListener( (options, oldValue, newValue) -> {
+            // Get the filter
             String userSelection = filterList.getValue();
+            // If the filter is empty, display all items
             if (userSelection == null || userSelection.isEmpty()) {
                 tableView.setItems(wholeDataSet.getDataPoints());
             }
-            if (userSelection != null) {
+            // If the filter is not empty, display a filtered list of items and update summary data
+            else if (userSelection != null) {
                 tableView.setItems(wholeDataSet.search(userSelection));
+                summaryTable.getItems().clear();
+                summaryData = summaryData.newSummary(wholeDataSet.allCrimeIndices(wholeDataSet.search(userSelection)));
+                summaryTable.getItems().add(summaryData);
             }
         });
 
-        tableView.setRowFactory( tv -> {
+        // Detect if user double clicks a row
+        tableView.setRowFactory( table -> {
 
             TableRow<DataPoint> row = new TableRow<>();
             row.setOnMouseClicked(event -> {
                 if (event.getClickCount() == 2 && !row.isEmpty()) {
-
-                    // Create pop up window
-                    popUp.setTitle("Data value");
-
+                    // Add the DataPoint in the clicked row and display stage
+                    singleTable.getItems().clear();
                     singleTable.getItems().add(row.getItem());
-                    
-
-                    Scene singleScene = new Scene(singleTable, 400, 60);
-                    popUp.setScene(singleScene);
                     popUp.show();
 
                 }
@@ -168,28 +187,23 @@ public class DataVisualization extends Application {
 
         });
 
-        // Check to see if user types
+        // Detect if the user typed into the filter
         filterField.textProperty().addListener((observable, oldValue, newValue) -> {
             // If the text field is empty, display all data points
             if (newValue == null || newValue.isEmpty()) {
                 tableView.setItems(wholeDataSet.getDataPoints());
             }
-            // If the text field is not empty, display the data points containing the search value
+            // If the text field is not empty, display the data points containing the search value and update summary table
             else {
                 tableView.setItems(wholeDataSet.search(newValue));
+                summaryTable.getItems().clear();
+                summaryData = summaryData.newSummary(wholeDataSet.allCrimeIndices(wholeDataSet.search(newValue)));
+                summaryTable.getItems().add(summaryData);
             }
         });
-
-        summaryInformation.getItems().add(summaryData);
         
-        // Add text field and filter list into horizontal box
-        hBox.getChildren().addAll(filterField, filterList);
-        // Add text field and table view into a vertical box
-        vBox.getChildren().addAll(hBox, tableView, summaryInformation);
-
-        // Create and set scene
-        Scene scene = new Scene(vBox, 400, 400);
-        primaryStage.setScene(scene);
+        // Set scene and show primary stage
+        primaryStage.setScene(mainScene);
         primaryStage.show();
     }
 

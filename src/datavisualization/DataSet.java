@@ -1,6 +1,5 @@
 package datavisualization;
 
-import java.util.*;
 import javafx.collections.ObservableList;
 import javafx.collections.FXCollections;
 
@@ -28,12 +27,12 @@ public class DataSet {
         dataPoints.add(data);
     }
 
-    public ObservableList<Double> allCrimeIndices() {
+    public ObservableList<Double> allCrimeIndices(ObservableList<DataPoint> dataValues) {
         ObservableList<Double> tempList;
 
         tempList = FXCollections.observableArrayList();
 
-        for (DataPoint data: dataPoints) {
+        for (DataPoint data: dataValues) {
             tempList.add(data.getCrimeIndex());
         }
 
