@@ -5,19 +5,23 @@ import java.io.*;
 import javafx.application.Application;
 import javafx.collections.ObservableList;
 import javafx.collections.FXCollections;
+import javafx.event.ActionEvent;
 import javafx.scene.Scene;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.VBox;
+import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 
 public class DataVisualization extends Application {
 
     // Instance variables
     private VBox vBox = new VBox(10);
+    private HBox hBox = new HBox(10);
 
     private TableView<DataPoint> tableView;
     private TableView<DataPoint> singleTable;
@@ -30,6 +34,7 @@ public class DataVisualization extends Application {
     private DataSet wholeDataSet;
     private Stage popUp;
 
+    private ComboBox<String> filterList;
 	private TextField filterField;
 
     public static void main(String args[]) {
@@ -59,6 +64,32 @@ public class DataVisualization extends Application {
         // Initially add all data points into the table view
         wholeDataSet = new DataSet(importData());
         tableView.setItems(wholeDataSet.getDataPoints());
+
+        // Create list of filters
+        filterList = new ComboBox<>();
+        filterList.getItems().addAll(
+            "",
+            "Newfoundland and Labrador", 
+            "Prince Edward Island", 
+            "Nova Scotia",
+            "New Brunswick",
+            "Quebec",
+            "Ontario",
+            "Manitoba",
+            "Saskatchewan",
+            "Alberta",
+            "British Columbia"
+        );
+        
+        filterList.getSelectionModel().selectedItemProperty().addListener( (options, oldValue, newValue) -> {
+            String userSelection = filterList.getValue();
+            if (userSelection == null || userSelection.isEmpty()) {
+                tableView.setItems(wholeDataSet.getDataPoints());
+            }
+            if (userSelection != null) {
+                tableView.setItems(wholeDataSet.search(userSelection));
+            }
+        });
         
         /*
         tableView.setOnSort(event -> {
@@ -109,8 +140,10 @@ public class DataVisualization extends Application {
             }
 		});
         
+        // Add text field and filter list into horizontal box
+        hBox.getChildren().addAll(filterField, filterList);
         // Add text field and table view into a vertical box
-        vBox.getChildren().addAll(filterField, tableView);
+        vBox.getChildren().addAll(hBox, tableView);
 
         // Create and set scene
         Scene scene = new Scene(vBox, 400, 500);
@@ -118,7 +151,7 @@ public class DataVisualization extends Application {
         primaryStage.show();
     }
 
-    private static ObservableList<DataPoint> importData() throws IOException {
+    private ObservableList<DataPoint> importData() throws IOException {
         
         BufferedReader file = new BufferedReader(new FileReader("data.csv"));
 
