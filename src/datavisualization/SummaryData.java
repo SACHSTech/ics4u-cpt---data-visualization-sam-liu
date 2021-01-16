@@ -1,6 +1,8 @@
 package datavisualization;
 
 import java.util.*;
+import javafx.collections.ObservableList;
+import javafx.collections.FXCollections;
 
 public class SummaryData {
     
@@ -10,9 +12,9 @@ public class SummaryData {
     private double mean;
     private double median;
     private double standardDeviation;
-    private ArrayList<Double> crimeIndices;
+    private ObservableList<Double> crimeIndices;
 
-    public SummaryData(ArrayList<Double> crimeIndices) {
+    public SummaryData(ObservableList<Double> crimeIndices) {
         this.crimeIndices = crimeIndices;
         calculate();
     }
@@ -74,10 +76,17 @@ public class SummaryData {
     }
 
     private void sort() {
-        mergeSort(new ArrayList<Double>(crimeIndices), 0, count - 1);
+        ObservableList<Double> tempList;
+
+        tempList = FXCollections.observableArrayList();
+
+        for (Double value: crimeIndices) {
+            tempList.add(value);
+        }
+        mergeSort(tempList, 0, count - 1);
     }
 
-    private void mergeSort(ArrayList<Double> temporaryList, int from, int to) {
+    private void mergeSort(ObservableList<Double> temporaryList, int from, int to) {
         if (to - from >= 1) {
             int mid = (from + to) / 2;
             // Recursive call
@@ -88,7 +97,7 @@ public class SummaryData {
         }
     }
 
-    private void merge(ArrayList<Double> temporaryList, int from, int mid, int to) {
+    private void merge(ObservableList<Double> temporaryList, int from, int mid, int to) {
         int p1;
         int p2;
         int p3;

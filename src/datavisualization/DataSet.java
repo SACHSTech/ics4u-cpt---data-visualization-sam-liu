@@ -28,6 +28,18 @@ public class DataSet {
         dataPoints.add(data);
     }
 
+    public ObservableList<Double> allCrimeIndices() {
+        ObservableList<Double> tempList;
+
+        tempList = FXCollections.observableArrayList();
+
+        for (DataPoint data: dataPoints) {
+            tempList.add(data.getCrimeIndex());
+        }
+
+        return tempList;
+    }
+
     public ObservableList<DataPoint> search(String key) {
         key = key.toLowerCase();
         ObservableList<DataPoint> tempList;

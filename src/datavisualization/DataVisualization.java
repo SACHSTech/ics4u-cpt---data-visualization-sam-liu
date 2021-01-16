@@ -20,8 +20,8 @@ import javafx.stage.Stage;
 public class DataVisualization extends Application {
 
     // Instance variables
-    private VBox vBox = new VBox(10);
-    private HBox hBox = new HBox(10);
+    private VBox vBox;
+    private HBox hBox;
 
     private TableView<DataPoint> tableView;
     private TableView<DataPoint> singleTable;
@@ -43,7 +43,6 @@ public class DataVisualization extends Application {
     private DataSet wholeDataSet;
     private SummaryData summaryData;
     private Stage popUp;
-
     private ComboBox<String> filterList;
 	private TextField filterField;
 
@@ -58,20 +57,49 @@ public class DataVisualization extends Application {
         primaryStage.setTitle("Crime index over time");
 
         // Initialize variables
-        filterField = new TextField();
+        vBox = new VBox(10);
+        hBox = new HBox(10);
+
+        tableView = new TableView<>();
+        singleTable = new TableView<>();
+        summaryInformation = new TableView<>();
 
         provinceCol = new TableColumn<>("Province");
-        provinceCol.setCellValueFactory(new PropertyValueFactory<>("province"));
         yearCol = new TableColumn<>("Year");
-        yearCol.setCellValueFactory(new PropertyValueFactory<>("year"));
         crimeCol = new TableColumn<>("Crime index");
+        provinceColCopy = new TableColumn<>("Province");
+        yearColCopy = new TableColumn<>("Year");
+        crimeColCopy = new TableColumn<>("crimeIndex");
+        countCol = new TableColumn<>("Count");
+        maxCol = new TableColumn<>("Max");
+        minCol = new TableColumn<>("Min");
+        meanCol = new TableColumn<>("μ");
+        medianCol = new TableColumn<>("Median");
+        standardDeviationCol = new TableColumn<>("σ");
+
+        wholeDataSet = new DataSet(importData());
+        summaryData = new SummaryData(wholeDataSet.allCrimeIndices());
+        popUp = new Stage();
+        filterList = new ComboBox<>();
+        filterField = new TextField();
+
+        // Initialize table view columns
+        provinceCol.setCellValueFactory(new PropertyValueFactory<>("province"));
+        yearCol.setCellValueFactory(new PropertyValueFactory<>("year"));
         crimeCol.setCellValueFactory(new PropertyValueFactory<>("crimeIndex"));
 
-        // Add columns to table view
-        tableView = new TableView<>();
-        tableView.getColumns().addAll(provinceCol, yearCol, crimeCol);
-        tableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        provinceColCopy.setCellValueFactory(new PropertyValueFactory<>("province"));
+        yearColCopy.setCellValueFactory(new PropertyValueFactory<>("year"));
+        crimeColCopy.setCellValueFactory(new PropertyValueFactory<>("crimeIndex"));
 
+        countCol.setCellValueFactory(new PropertyValueFactory<>("count"));
+        maxCol.setCellValueFactory(new PropertyValueFactory<>("max"));
+        minCol.setCellValueFactory(new PropertyValueFactory<>("min"));
+        meanCol.setCellValueFactory(new PropertyValueFactory<>("mean"));
+        medianCol.setCellValueFactory(new PropertyValueFactory<>("median"));
+        standardDeviationCol.setCellValueFactory(new PropertyValueFactory<>("standardDeviation"));
+
+        // Fix width of province, year, and crime columns in tableView
         provinceCol.prefWidthProperty().bind(tableView.widthProperty().multiply(0.48));
         provinceCol.setResizable(false);
         yearCol.prefWidthProperty().bind(tableView.widthProperty().multiply(0.23));
@@ -79,12 +107,21 @@ public class DataVisualization extends Application {
         crimeCol.prefWidthProperty().bind(tableView.widthProperty().multiply(0.23));
         crimeCol.setResizable(false);
 
+        // Add columns to respective table views
+        tableView.getColumns().addAll(provinceCol, yearCol, crimeCol);
+        singleTable.getColumns().addAll(provinceColCopy, yearColCopy, crimeColCopy);
+        summaryInformation.getColumns().addAll(countCol, maxCol, minCol, meanCol, medianCol, standardDeviationCol);
+
+        // Remove default additional column of table view
+        tableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        singleTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        summaryInformation.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+
+
         // Initially add all data points into the table view
-        wholeDataSet = new DataSet(importData());
         tableView.setItems(wholeDataSet.getDataPoints());
 
         // Create list of filters
-        filterList = new ComboBox<>();
         filterList.getItems().addAll(
             "",
             "Newfoundland and Labrador", 
@@ -116,20 +153,10 @@ public class DataVisualization extends Application {
                 if (event.getClickCount() == 2 && !row.isEmpty()) {
 
                     // Create pop up window
-                    popUp = new Stage();
                     popUp.setTitle("Data value");
 
-                    provinceColCopy = new TableColumn<>("Province");
-                    provinceColCopy.setCellValueFactory(new PropertyValueFactory<>("province"));
-                    yearColCopy = new TableColumn<>("Year");
-                    yearColCopy.setCellValueFactory(new PropertyValueFactory<>("year"));
-                    crimeColCopy = new TableColumn<>("crimeIndex");
-                    crimeColCopy.setCellValueFactory(new PropertyValueFactory<>("crimeIndex"));
-
-                    singleTable = new TableView<>();
-                    singleTable.getColumns().addAll(provinceColCopy, yearColCopy, crimeColCopy);
                     singleTable.getItems().add(row.getItem());
-                    singleTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+                    
 
                     Scene singleScene = new Scene(singleTable, 400, 60);
                     popUp.setScene(singleScene);
@@ -152,29 +179,7 @@ public class DataVisualization extends Application {
                 tableView.setItems(wholeDataSet.search(newValue));
             }
         });
-        
-        countCol = new TableColumn<>("Count");
-        countCol.setCellValueFactory(new PropertyValueFactory<>("count"));
-        maxCol = new TableColumn<>("Max");
-        maxCol.setCellValueFactory(new PropertyValueFactory<>("max"));
-        minCol = new TableColumn<>("Min");
-        minCol.setCellValueFactory(new PropertyValueFactory<>("min"));
-        meanCol = new TableColumn<>("μ");
-        meanCol.setCellValueFactory(new PropertyValueFactory<>("mean"));
-        medianCol = new TableColumn<>("Median");
-        medianCol.setCellValueFactory(new PropertyValueFactory<>("median"));
-        standardDeviationCol = new TableColumn<>("σ");
-        standardDeviationCol.setCellValueFactory(new PropertyValueFactory<>("standardDeviation"));
 
-        summaryInformation = new TableView<>();
-        summaryInformation.getColumns().addAll(countCol, maxCol, minCol, meanCol, medianCol, standardDeviationCol);
-        summaryInformation.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
-        ArrayList<Double> crimeIndices;
-        crimeIndices = new ArrayList<>();
-        for (int i = 0; i < wholeDataSet.getSize(); ++i) {
-            crimeIndices.add(wholeDataSet.getDataPoints().get(i).getCrimeIndex());
-        }
-        summaryData = new SummaryData(crimeIndices);
         summaryInformation.getItems().add(summaryData);
         
         // Add text field and filter list into horizontal box
