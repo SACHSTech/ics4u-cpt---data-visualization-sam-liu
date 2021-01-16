@@ -13,7 +13,6 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import javafx.util.Callback;
 
 public class DataVisualization extends Application {
 
@@ -21,10 +20,15 @@ public class DataVisualization extends Application {
     private VBox vBox = new VBox(10);
 
     private TableView<DataPoint> tableView;
+    private TableView<DataPoint> singleTable;
     private TableColumn<DataPoint, String> provinceCol;
     private TableColumn<DataPoint, Integer> yearCol;
     private TableColumn<DataPoint, Double> crimeCol;
+    private TableColumn<DataPoint, String> provinceColCopy;
+    private TableColumn<DataPoint, Integer> yearColCopy;
+    private TableColumn<DataPoint, Double> crimeColCopy;
     private DataSet wholeDataSet;
+    private Stage popUp;
 
 	private TextField filterField;
 
@@ -63,14 +67,34 @@ public class DataVisualization extends Application {
         */
 
         tableView.setRowFactory( tv -> {
+
             TableRow<DataPoint> row = new TableRow<>();
             row.setOnMouseClicked(event -> {
                 if (event.getClickCount() == 2 && !row.isEmpty()) {
-                    DataPoint rowData = row.getItem();
-                    System.out.println(rowData.getCrimeIndex());
+
+                    // Create pop up window
+                    popUp = new Stage();
+                    popUp.setTitle("Data value");
+
+                    provinceColCopy = new TableColumn<>("Province");
+                    provinceColCopy.setCellValueFactory(new PropertyValueFactory<>("province"));
+                    yearColCopy = new TableColumn<>("Year");
+                    yearColCopy.setCellValueFactory(new PropertyValueFactory<>("year"));
+                    crimeColCopy = new TableColumn<>("crimeIndex");
+                    crimeColCopy.setCellValueFactory(new PropertyValueFactory<>("crimeIndex"));
+
+                    singleTable = new TableView<>();
+                    singleTable.getColumns().addAll(provinceColCopy, yearColCopy, crimeColCopy);
+                    singleTable.getItems().add(row.getItem());
+
+                    Scene singleScene = new Scene(singleTable, 400, 300);
+                    popUp.setScene(singleScene);
+                    popUp.show();
+
                 }
             });
-            return row ;
+            return row;
+
         });
 
         // Check to see if user types
