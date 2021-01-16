@@ -5,12 +5,9 @@ import java.io.*;
 import javafx.application.Application;
 import javafx.collections.ObservableList;
 import javafx.collections.FXCollections;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.stage.Stage;
 import javafx.scene.Scene;
 import javafx.scene.control.TableColumn;
-import javafx.scene.control.Button;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
@@ -39,16 +36,13 @@ public class DataVisualization extends Application {
     public void start(Stage primaryStage) throws IOException {
         primaryStage.setTitle("Crime index over time");
 
-        // Create filter field
+        // Initialize variables
         filterField = new TextField();
 
-        // Set properties for table columns
         provinceCol = new TableColumn<>("Province");
         provinceCol.setCellValueFactory(new PropertyValueFactory<>("province"));
-
         yearCol = new TableColumn<>("Year");
         yearCol.setCellValueFactory(new PropertyValueFactory<>("year"));
-
         crimeCol = new TableColumn<>("Crime index");
         crimeCol.setCellValueFactory(new PropertyValueFactory<>("crimeIndex"));
 
@@ -56,33 +50,28 @@ public class DataVisualization extends Application {
         tableView = new TableView<>();
         tableView.getColumns().addAll(provinceCol, yearCol, crimeCol);
 
+        // Initially add all data points into the table view
         wholeDataSet = new DataSet(importData());
         tableView.setItems(wholeDataSet.getDataPoints());
 
+        // Check to see if user types
         filterField.textProperty().addListener((observable, oldValue, newValue) -> {
+            // If the text field is empty, display all data points
             if (newValue == null || newValue.isEmpty()) {
                 tableView.setItems(wholeDataSet.getDataPoints());
             }
+            // If the text field is not empty, display the data points containing the search value
             else {
                 tableView.setItems(wholeDataSet.search(newValue));
             }
 		});
-
-        Button sortCrimeButton = new Button("Sort by crime index");
-        sortCrimeButton.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent e) {
-                // Sort the data set
-                wholeDataSet.sort("year", false);
-            }
-        });
         
+        // Add text field and table view into a vertical box
         vBox.getChildren().addAll(filterField, tableView);
 
         // Create and set scene
-        Scene scene = new Scene(vBox, 600, 600);
+        Scene scene = new Scene(vBox, 400, 500);
         primaryStage.setScene(scene);
-
         primaryStage.show();
     }
 

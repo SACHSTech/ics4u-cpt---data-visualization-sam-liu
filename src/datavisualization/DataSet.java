@@ -6,9 +6,11 @@ import javafx.collections.FXCollections;
 
 public class DataSet {
     
+    // Instance variables
     private ObservableList<DataPoint> dataPoints;
     private int size;
 
+    // Constructor
     public DataSet(ObservableList<DataPoint> dataPoints) {
         this.dataPoints = dataPoints;
         this.size = dataPoints.size();
@@ -24,10 +26,6 @@ public class DataSet {
 
     public void addData(DataPoint data) {
         dataPoints.add(data);
-    }
-
-    public void sort(String sortBy, boolean reverse) {
-        mergeSort(new ArrayList<DataPoint>(dataPoints), 0, size - 1, sortBy, reverse);
     }
 
     public ObservableList<DataPoint> search(String key) {
@@ -49,6 +47,10 @@ public class DataSet {
         }
 
         return tempList;
+    }
+
+    public void sort(String sortBy, boolean reverse) {
+        mergeSort(new ArrayList<DataPoint>(dataPoints), 0, size - 1, sortBy, reverse);
     }
 
     private void mergeSort(ArrayList<DataPoint> temporaryList, int from, int to, String sortBy, boolean reverse) {
