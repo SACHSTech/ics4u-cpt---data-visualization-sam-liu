@@ -5,13 +5,15 @@ import java.io.*;
 import javafx.application.Application;
 import javafx.collections.ObservableList;
 import javafx.collections.FXCollections;
-import javafx.stage.Stage;
 import javafx.scene.Scene;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
+import javafx.util.Callback;
 
 public class DataVisualization extends Application {
 
@@ -53,6 +55,23 @@ public class DataVisualization extends Application {
         // Initially add all data points into the table view
         wholeDataSet = new DataSet(importData());
         tableView.setItems(wholeDataSet.getDataPoints());
+        
+        /*
+        tableView.setOnSort(event -> {
+            System.out.println("hi");
+        });
+        */
+
+        tableView.setRowFactory( tv -> {
+            TableRow<DataPoint> row = new TableRow<>();
+            row.setOnMouseClicked(event -> {
+                if (event.getClickCount() == 2 && !row.isEmpty()) {
+                    DataPoint rowData = row.getItem();
+                    System.out.println(rowData.getCrimeIndex());
+                }
+            });
+            return row ;
+        });
 
         // Check to see if user types
         filterField.textProperty().addListener((observable, oldValue, newValue) -> {
