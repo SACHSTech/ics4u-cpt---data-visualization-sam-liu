@@ -7,11 +7,17 @@ import javafx.beans.binding.Bindings;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.collections.FXCollections;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.chart.LineChart;
+import javafx.scene.chart.XYChart;
+import javafx.scene.chart.XYChart.Data;
+import javafx.scene.chart.NumberAxis;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
+import javafx.scene.control.Tooltip;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.VBox;
@@ -41,6 +47,22 @@ public class DataVisualization extends Application {
     private TableColumn<SummaryData, Double> meanCol;
     private TableColumn<SummaryData, Double> medianCol;
     private TableColumn<SummaryData, Double> standardDeviationCol;
+
+    private LineChart<Integer, Double> lineChart;
+    private NumberAxis xAxis;
+    private NumberAxis yAxis;
+    private ObservableList<XYChart.Series<Integer,Double>> lineChartData;
+
+    private XYChart.Series<Integer, Double> bcSeries;
+    private XYChart.Series<Integer, Double> abSeries;
+    private XYChart.Series<Integer, Double> skSeries;
+    private XYChart.Series<Integer, Double> mbSeries;
+    private XYChart.Series<Integer, Double> onSeries;
+    private XYChart.Series<Integer, Double> qcSeries;
+    private XYChart.Series<Integer, Double> nbSeries;
+    private XYChart.Series<Integer, Double> nsSeries;
+    private XYChart.Series<Integer, Double> peSeries;
+    private XYChart.Series<Integer, Double> nlSeries;
 
     private DataSet wholeDataSet;
     private SummaryData summaryData;
@@ -219,6 +241,14 @@ public class DataVisualization extends Application {
         // Set scene and show primary stage
         primaryStage.setScene(mainScene);
         primaryStage.show();
+
+
+        
+
+        Stage tmp = new Stage();
+        Scene sc = new Scene(createLineGraph());
+        tmp.setScene(sc);
+        tmp.show();
     }
 
     private ObservableList<DataPoint> importData() throws IOException {
@@ -247,6 +277,86 @@ public class DataVisualization extends Application {
         file.close();
 
         return temporaryList;
+
+    }
+
+    public Parent createLineGraph() {
+        
+        // Initialize variables
+        xAxis = new NumberAxis("Year", 2010, 2019, 1);
+        yAxis = new NumberAxis("Crime index", 0, 160, 15);
+        lineChart = new LineChart(xAxis, yAxis);
+
+        bcSeries = new XYChart.Series<>();
+        abSeries = new XYChart.Series<>();
+        skSeries = new XYChart.Series<>();
+        mbSeries = new XYChart.Series<>();
+        onSeries = new XYChart.Series<>();
+        qcSeries = new XYChart.Series<>();
+        nbSeries = new XYChart.Series<>();
+        nsSeries = new XYChart.Series<>();
+        peSeries = new XYChart.Series<>();
+        nlSeries = new XYChart.Series<>();
+
+        // Set names to series
+        bcSeries.setName("BC");
+        abSeries.setName("AB");
+        skSeries.setName("SK");
+        mbSeries.setName("MB");
+        onSeries.setName("ON");
+        qcSeries.setName("QC");
+        nbSeries.setName("NB");
+        nsSeries.setName("NS");
+        peSeries.setName("PE");
+        nlSeries.setName("NL");
+
+        // Add data points into graph depending on its province
+        for (DataPoint data: wholeDataSet.getDataPoints()) {
+            switch (data.getProvince()) {
+                case "British Columbia" :
+                    bcSeries.getData().add(new XYChart.Data<Integer, Double>(data.getYear(), data.getCrimeIndex()));
+                    break;
+                case "Alberta" :
+                    abSeries.getData().add(new XYChart.Data<Integer, Double>(data.getYear(), data.getCrimeIndex()));
+                    break;
+                case "Saskatchewan" :
+                    skSeries.getData().add(new XYChart.Data<Integer, Double>(data.getYear(), data.getCrimeIndex()));
+                    break;
+                case "Manitoba" :
+                    mbSeries.getData().add(new XYChart.Data<Integer, Double>(data.getYear(), data.getCrimeIndex()));
+                    break;
+                case "Ontario" :
+                    onSeries.getData().add(new XYChart.Data<Integer, Double>(data.getYear(), data.getCrimeIndex()));
+                    break;
+                case "Quebec" :
+                    qcSeries.getData().add(new XYChart.Data<Integer, Double>(data.getYear(), data.getCrimeIndex()));
+                    break;
+                case "New Brunswick" :
+                    nbSeries.getData().add(new XYChart.Data<Integer, Double>(data.getYear(), data.getCrimeIndex()));
+                    break;
+                case "Nova Scotia" :
+                    nsSeries.getData().add(new XYChart.Data<Integer, Double>(data.getYear(), data.getCrimeIndex()));
+                    break;
+                case "Prince Edward Island" :
+                    peSeries.getData().add(new XYChart.Data<Integer, Double>(data.getYear(), data.getCrimeIndex()));
+                    break;
+                default:
+                    nlSeries.getData().add(new XYChart.Data<Integer, Double>(data.getYear(), data.getCrimeIndex()));
+                    break;
+            }
+        }
+
+        // Add series into line chart
+        lineChart.getData().addAll(bcSeries, abSeries, skSeries, mbSeries, onSeries, qcSeries, nbSeries, nsSeries, peSeries, nlSeries);
+
+        for (Data<Integer, Double> entry: skSeries.getData()) {
+            Tooltip tool;
+            tool = new Tooltip("Province: SK, Year: " + entry.getXValue().toString() + ", Index: " + entry.getYValue().toString());
+            Tooltip.install(entry.getNode(), tool);
+        }
+
+        // Return line chart
+        return lineChart;
 
     }
 
