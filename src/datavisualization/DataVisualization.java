@@ -13,6 +13,7 @@ import javafx.scene.chart.LineChart;
 import javafx.scene.chart.XYChart;
 import javafx.scene.chart.XYChart.Data;
 import javafx.scene.chart.NumberAxis;
+import javafx.scene.chart.PieChart;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
@@ -53,6 +54,7 @@ public class DataVisualization extends Application {
     private NumberAxis xAxis;
     private NumberAxis yAxis;
     private ObservableList<XYChart.Series<Integer,Double>> lineChartData;
+    private PieChart pieChart;
 
     private XYChart.Series<Integer, Double> bcSeries;
     private XYChart.Series<Integer, Double> abSeries;
@@ -245,6 +247,11 @@ public class DataVisualization extends Application {
         primaryStage.setScene(mainScene);
         primaryStage.show();
 
+        Scene sc = new Scene(createPieGraph());
+        Stage st = new Stage();
+        st.setScene(sc);
+        st.show();
+
     }
 
     private ObservableList<DataPoint> importData() throws IOException {
@@ -348,6 +355,46 @@ public class DataVisualization extends Application {
 
         // Return line chart
         return lineChart;
+
+    }
+
+    public Parent createPieGraph() {
+        // Declare varaibles
+        String provinces[] = { "British Columbia", "Alberata", "Saskatchewan", "Manitoba", "Ontario", "Quebec", "New Brunswick", "Nova Scoita", "Prince Edward Island", "Newfoundland and Labrador" };
+        double count[];
+        ObservableList<PieChart.Data> pieChartData;
+
+        // Initialize variables
+        pieChart = new PieChart();
+        count = new double[10];
+        
+        // Get the total crime index for each of the provinces
+        for (DataPoint data: wholeDataSet.getDataPoints()) {
+            for (int i = 0; i < 10; ++i) {
+                if (data.getProvince().equals(provinces[i])) {
+                    count[i] += data.getCrimeIndex();
+                }
+            }
+        }
+
+        // Create pie chart data
+        pieChartData = FXCollections.observableArrayList(
+            new PieChart.Data("BC", count[0]),
+            new PieChart.Data("AB", count[1]),
+            new PieChart.Data("SK", count[2]),
+            new PieChart.Data("MB", count[3]),
+            new PieChart.Data("ON", count[4]),
+            new PieChart.Data("QC", count[5]),
+            new PieChart.Data("NB", count[6]),
+            new PieChart.Data("NS", count[7]),
+            new PieChart.Data("PE", count[8]),
+            new PieChart.Data("NL", count[9])
+        );
+
+        pieChart = new PieChart(pieChartData);
+        pieChart.setTitle("Crime Index by Province");
+
+        return pieChart;
 
     }
 
