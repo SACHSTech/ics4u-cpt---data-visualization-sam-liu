@@ -30,6 +30,7 @@ public class DataVisualization extends Application {
     // Instance variables
     private VBox vBox;
     private HBox hBox;
+    private HBox wholeScreen;
 
     private TableView<DataPoint> tableView;
     private TableView<DataPoint> singleTable;
@@ -83,6 +84,7 @@ public class DataVisualization extends Application {
         // Initialize variables
         vBox = new VBox(10);
         hBox = new HBox(10);
+        wholeScreen = new HBox(30);
 
         tableView = new TableView<>();
         singleTable = new TableView<>();
@@ -106,7 +108,7 @@ public class DataVisualization extends Application {
         filterList = new ComboBox<>();
         filterField = new TextField();
         popUp = new Stage();
-        mainScene = new Scene(vBox);
+        mainScene = new Scene(wholeScreen);
         popUpScene = new Scene(singleTable, 410, 80);
 
         // Initialize table view columns
@@ -167,6 +169,7 @@ public class DataVisualization extends Application {
         HBox.setHgrow(filterField, Priority.ALWAYS);
         HBox.setHgrow(filterList, Priority.ALWAYS);
         vBox.getChildren().addAll(hBox, tableView, summaryTable);
+        wholeScreen.getChildren().addAll(createLineGraph(), vBox);
 
         // Configure popup stage
         popUp.setTitle("Data value");
@@ -242,13 +245,6 @@ public class DataVisualization extends Application {
         primaryStage.setScene(mainScene);
         primaryStage.show();
 
-
-        
-
-        Stage tmp = new Stage();
-        Scene sc = new Scene(createLineGraph());
-        tmp.setScene(sc);
-        tmp.show();
     }
 
     private ObservableList<DataPoint> importData() throws IOException {
@@ -298,7 +294,8 @@ public class DataVisualization extends Application {
         peSeries = new XYChart.Series<>();
         nlSeries = new XYChart.Series<>();
 
-        // Set names to series
+        // Set names 
+        lineChart.setTitle("Year vs Crime Index");
         bcSeries.setName("BC");
         abSeries.setName("AB");
         skSeries.setName("SK");
@@ -348,12 +345,6 @@ public class DataVisualization extends Application {
 
         // Add series into line chart
         lineChart.getData().addAll(bcSeries, abSeries, skSeries, mbSeries, onSeries, qcSeries, nbSeries, nsSeries, peSeries, nlSeries);
-
-        for (Data<Integer, Double> entry: skSeries.getData()) {
-            Tooltip tool;
-            tool = new Tooltip("Province: SK, Year: " + entry.getXValue().toString() + ", Index: " + entry.getYValue().toString());
-            Tooltip.install(entry.getNode(), tool);
-        }
 
         // Return line chart
         return lineChart;
