@@ -1,10 +1,11 @@
 package datavisualization;
 
 import java.io.*;
-import java.util.*;
 
 import javafx.application.Application;
+import javafx.beans.binding.Bindings;
 import javafx.collections.ObservableList;
+import javafx.geometry.Insets;
 import javafx.collections.FXCollections;
 import javafx.scene.Scene;
 import javafx.scene.control.TableColumn;
@@ -15,6 +16,7 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
 import javafx.stage.Stage;
 
 public class DataVisualization extends Application {
@@ -69,7 +71,7 @@ public class DataVisualization extends Application {
         crimeCol = new TableColumn<>("Crime index");
         provinceColCopy = new TableColumn<>("Province");
         yearColCopy = new TableColumn<>("Year");
-        crimeColCopy = new TableColumn<>("crimeIndex");
+        crimeColCopy = new TableColumn<>("Crime index");
         countCol = new TableColumn<>("Count");
         maxCol = new TableColumn<>("Max");
         minCol = new TableColumn<>("Min");
@@ -82,8 +84,8 @@ public class DataVisualization extends Application {
         filterList = new ComboBox<>();
         filterField = new TextField();
         popUp = new Stage();
-        mainScene = new Scene(vBox, 400, 400);
-        popUpScene = new Scene(singleTable, 400, 60);
+        mainScene = new Scene(vBox);
+        popUpScene = new Scene(singleTable, 410, 80);
 
         // Initialize table view columns
         provinceCol.setCellValueFactory(new PropertyValueFactory<>("province"));
@@ -121,10 +123,18 @@ public class DataVisualization extends Application {
         singleTable.getColumns().addAll(provinceColCopy, yearColCopy, crimeColCopy);
         summaryTable.getColumns().addAll(countCol, maxCol, minCol, meanCol, medianCol, standardDeviationCol);
 
+        // Add padding 
+        vBox.setPadding(new Insets(10, 10, 10, 10));
+        singleTable.setPadding(new Insets(10, 10, 10, 10));
+
         // Remove default additional column of table view
         tableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         singleTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         summaryTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+
+        // Fix number of rows
+        summaryTable.setFixedCellSize(25);
+        summaryTable.prefHeightProperty().bind(Bindings.size(summaryTable.getItems()).multiply(summaryTable.getFixedCellSize()).add(40));
 
         // Set default items to table views
         tableView.setItems(wholeDataSet.getDataPoints());
@@ -132,6 +142,8 @@ public class DataVisualization extends Application {
 
         // Place nodes into horizontal and vertical box
         hBox.getChildren().addAll(filterField, filterList);
+        HBox.setHgrow(filterField, Priority.ALWAYS);
+        HBox.setHgrow(filterList, Priority.ALWAYS);
         vBox.getChildren().addAll(hBox, tableView, summaryTable);
 
         // Configure popup stage
@@ -161,13 +173,14 @@ public class DataVisualization extends Application {
             if (userSelection == null || userSelection.isEmpty()) {
                 tableView.setItems(wholeDataSet.getDataPoints());
             }
-            // If the filter is not empty, display a filtered list of items and update summary data
+            // If the filter is not empty, display a filtered list of items 
             else if (userSelection != null) {
                 tableView.setItems(wholeDataSet.search(userSelection));
-                summaryTable.getItems().clear();
-                summaryData = summaryData.newSummary(wholeDataSet.allCrimeIndices(wholeDataSet.search(userSelection)));
-                summaryTable.getItems().add(summaryData);
             }
+            // Update summary data
+            summaryTable.getItems().clear();
+            summaryData = summaryData.newSummary(wholeDataSet.allCrimeIndices(wholeDataSet.search(userSelection)));
+            summaryTable.getItems().add(summaryData);
         });
 
         // Detect if user double clicks a row
@@ -193,13 +206,14 @@ public class DataVisualization extends Application {
             if (newValue == null || newValue.isEmpty()) {
                 tableView.setItems(wholeDataSet.getDataPoints());
             }
-            // If the text field is not empty, display the data points containing the search value and update summary table
+            // If the text field is not empty, display the data points containing the search value 
             else {
                 tableView.setItems(wholeDataSet.search(newValue));
-                summaryTable.getItems().clear();
-                summaryData = summaryData.newSummary(wholeDataSet.allCrimeIndices(wholeDataSet.search(newValue)));
-                summaryTable.getItems().add(summaryData);
             }
+            // Update summary data
+            summaryTable.getItems().clear();
+            summaryData = summaryData.newSummary(wholeDataSet.allCrimeIndices(wholeDataSet.search(newValue)));
+            summaryTable.getItems().add(summaryData);
         });
         
         // Set scene and show primary stage
