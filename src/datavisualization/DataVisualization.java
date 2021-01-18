@@ -2,7 +2,10 @@ package datavisualization;
 
 import java.io.*;
 import java.util.*;
+import java.lang.reflect.*;
 
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.application.Application;
 import javafx.beans.binding.Bindings;
 import javafx.collections.ObservableList;
@@ -11,6 +14,7 @@ import javafx.geometry.Pos;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.chart.LineChart;
@@ -26,6 +30,7 @@ import javafx.scene.control.Tooltip;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
@@ -63,6 +68,7 @@ public class DataVisualization extends Application {
     private NumberAxis yAxis;
     private Parent pieChart;
     private boolean isLineChart;
+    private Tooltip tooltip;
 
     private XYChart.Series<Integer, Double> bcSeries;
     private XYChart.Series<Integer, Double> abSeries;
@@ -193,7 +199,9 @@ public class DataVisualization extends Application {
         popUp.setScene(popUpScene);
 
         // Add tooltips to graph 
-        Tooltip.install(switchGraphs, new Tooltip("Switch graphs"));
+        tooltip = new Tooltip("Switch grades");
+        Tooltip.install(switchGraphs, tooltip);
+        bindTooltip(switchGraphs, tooltip);
 
         // Create list of filters
         filterList.getItems().addAll(
@@ -390,8 +398,10 @@ public class DataVisualization extends Application {
         // Add tooltip to data points
         for (XYChart.Series<Integer, Double> s : tempLineChart.getData()) {
             for (XYChart.Data<Integer, Double> d : s.getData()) {
-                Tooltip.install(d.getNode(), new Tooltip(
-                        "Province: " + s.getName() + ", Year: " + d.getXValue() + ", Crime index: " + d.getYValue()));
+                tooltip = new Tooltip("Province: " + s.getName() + ", Year: " + d.getXValue() + ", Crime index: " + d.getYValue());
+                Tooltip.install(d.getNode(), tooltip);
+
+                bindTooltip(d.getNode(), tooltip);
             }
         }
 
@@ -443,12 +453,29 @@ public class DataVisualization extends Application {
             int percentage;
             
             percentage = (int)(100.0 * data.getPieValue() / total);
-            Tooltip.install(data.getNode(), new Tooltip(
-                "Province: " + data.getName() + ", Crime index: " + Math.round(100.0 * data.getPieValue()) / 100.0 + ", " + percentage + "%"));
+            tooltip = new Tooltip("Province: " + data.getName() + ", Crime index: " + Math.round(100.0 * data.getPieValue()) / 100.0 + ", " + percentage + "%");
+            Tooltip.install(data.getNode(), tooltip);
+            bindTooltip(data.getNode(), tooltip);
         }
 
         return pieChart;
 
+    }
+
+    // Make the tooltip appear instantly
+    public static void bindTooltip(final Node node, final Tooltip tooltip) {
+        node.setOnMouseMoved(new EventHandler<MouseEvent>() {
+           @Override  
+           public void handle(MouseEvent event) {
+              tooltip.show(node, event.getScreenX(), event.getScreenY() + 15);
+           }
+        });  
+        node.setOnMouseExited(new EventHandler<MouseEvent>(){
+           @Override
+           public void handle(MouseEvent event){
+              tooltip.hide();
+           }
+        });
     }
 
 }
