@@ -1,74 +1,66 @@
 package datavisualization;
 
 import java.io.*;
-import java.util.*;
-import java.lang.reflect.*;
 
-import javafx.animation.KeyFrame;
-import javafx.animation.Timeline;
 import javafx.application.Application;
 import javafx.beans.binding.Bindings;
-import javafx.collections.ObservableList;
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.chart.LineChart;
-import javafx.scene.chart.XYChart;
-import javafx.scene.chart.XYChart.Data;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.PieChart;
+import javafx.scene.chart.XYChart;
+import javafx.scene.control.Button;
+import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
-import javafx.scene.control.Button;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.VBox;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import javafx.util.Duration;
 
+
+/*
+ * The main file
+ * @author S. Liu
+ * 
+ */
 public class DataVisualization extends Application {
 
-    // Instance variables
-    private VBox vBox;
-    private VBox vGraph;
-    private HBox hBox;
-    private HBox wholeScreen;
+    // Declare instance variables
+    private VBox databaseVBox;
+    private VBox graphVBox;
+    private HBox filterHBox;
+    private HBox screenHBox;
 
-    private TableView<DataPoint> tableView;
-    private TableView<DataPoint> singleTable;
+    private TableView<DataPoint> databaseTable;
+    private TableView<DataPoint> datapointTable;
     private TableView<SummaryData> summaryTable;
 
     private TableColumn<DataPoint, String> provinceCol;
     private TableColumn<DataPoint, Integer> yearCol;
     private TableColumn<DataPoint, Double> crimeCol;
-    private TableColumn<DataPoint, String> provinceColCopy;
-    private TableColumn<DataPoint, Integer> yearColCopy;
-    private TableColumn<DataPoint, Double> crimeColCopy;
+    private TableColumn<DataPoint, String> provinceCol2;
+    private TableColumn<DataPoint, Integer> yearCol2;
+    private TableColumn<DataPoint, Double> crimeCol2;
     private TableColumn<SummaryData, Integer> countCol;
     private TableColumn<SummaryData, Double> maxCol;
     private TableColumn<SummaryData, Double> minCol;
     private TableColumn<SummaryData, Double> meanCol;
     private TableColumn<SummaryData, Double> medianCol;
     private TableColumn<SummaryData, Double> standardDeviationCol;
-
-    private Button switchGraphs;
-    private Parent lineChart;
-    private NumberAxis xAxis;
-    private NumberAxis yAxis;
-    private Parent pieChart;
-    private boolean isLineChart;
-    private Tooltip tooltip;
 
     private XYChart.Series<Integer, Double> bcSeries;
     private XYChart.Series<Integer, Double> abSeries;
@@ -82,37 +74,51 @@ public class DataVisualization extends Application {
     private XYChart.Series<Integer, Double> nlSeries;
 
     private DataSet wholeDataSet;
+    private Parent lineChart;
+    private Parent pieChart;
+    private Button switchGraphsButton;
+    private boolean isLineChart;
+    private Tooltip tooltip;
+
     private SummaryData summaryData;
     private ComboBox<String> filterList;
     private TextField filterField;
-    private Stage popUp;
+
+    private Stage popUpStage;
     private Scene mainScene;
     private Scene popUpScene;
 
+    /*
+     * The main method
+     */
     public static void main(String args[]) {
         launch(args);
     }
 
+    /*
+     * The method that starts the program
+     * 
+     * @param primaryStage - the primary stage
+     */
     @Override
     public void start(Stage primaryStage) throws IOException {
-        primaryStage.setTitle("Crime index over time");
 
         // Initialize variables
-        vBox = new VBox(10);
-        vGraph = new VBox(10);
-        hBox = new HBox(10);
-        wholeScreen = new HBox(30);
+        databaseVBox = new VBox(10);
+        graphVBox = new VBox(10);
+        filterHBox = new HBox(10);
+        screenHBox = new HBox(30);
 
-        tableView = new TableView<>();
-        singleTable = new TableView<>();
+        databaseTable = new TableView<>();
+        datapointTable = new TableView<>();
         summaryTable = new TableView<>();
 
         provinceCol = new TableColumn<>("Province");
         yearCol = new TableColumn<>("Year");
         crimeCol = new TableColumn<>("Crime index");
-        provinceColCopy = new TableColumn<>("Province");
-        yearColCopy = new TableColumn<>("Year");
-        crimeColCopy = new TableColumn<>("Crime index");
+        provinceCol2 = new TableColumn<>("Province");
+        yearCol2 = new TableColumn<>("Year");
+        crimeCol2 = new TableColumn<>("Crime index");
         countCol = new TableColumn<>("Count");
         maxCol = new TableColumn<>("Max");
         minCol = new TableColumn<>("Min");
@@ -120,26 +126,39 @@ public class DataVisualization extends Application {
         medianCol = new TableColumn<>("Median");
         standardDeviationCol = new TableColumn<>("σ");
 
+        bcSeries = new XYChart.Series<>();
+        abSeries = new XYChart.Series<>();
+        skSeries = new XYChart.Series<>();
+        mbSeries = new XYChart.Series<>();
+        onSeries = new XYChart.Series<>();
+        qcSeries = new XYChart.Series<>();
+        nbSeries = new XYChart.Series<>();
+        nsSeries = new XYChart.Series<>();
+        peSeries = new XYChart.Series<>();
+        nlSeries = new XYChart.Series<>();
+        
         wholeDataSet = new DataSet(importData());
+        lineChart = createLineGraph();
+        pieChart = createPieChart();
+        switchGraphsButton = new Button("Year vs Crime Index");
+        isLineChart = true;
+
         summaryData = new SummaryData(wholeDataSet.allCrimeIndices(wholeDataSet.getDataPoints()));
         filterList = new ComboBox<>();
         filterField = new TextField();
-        popUp = new Stage();
-        mainScene = new Scene(wholeScreen);
-        popUpScene = new Scene(singleTable, 410, 80);
-        switchGraphs = new Button("Year vs Crime Index");
-        lineChart = createLineGraph();
-        pieChart = createPieChart();
-        isLineChart = true;
 
-        // Initialize table view columns
+        popUpStage = new Stage();
+        mainScene = new Scene(screenHBox);
+        popUpScene = new Scene(datapointTable, 410, 80);
+
+        // Set properties to TableView columns
         provinceCol.setCellValueFactory(new PropertyValueFactory<>("province"));
         yearCol.setCellValueFactory(new PropertyValueFactory<>("year"));
         crimeCol.setCellValueFactory(new PropertyValueFactory<>("crimeIndex"));
 
-        provinceColCopy.setCellValueFactory(new PropertyValueFactory<>("province"));
-        yearColCopy.setCellValueFactory(new PropertyValueFactory<>("year"));
-        crimeColCopy.setCellValueFactory(new PropertyValueFactory<>("crimeIndex"));
+        provinceCol2.setCellValueFactory(new PropertyValueFactory<>("province"));
+        yearCol2.setCellValueFactory(new PropertyValueFactory<>("year"));
+        crimeCol2.setCellValueFactory(new PropertyValueFactory<>("crimeIndex"));
 
         countCol.setCellValueFactory(new PropertyValueFactory<>("count"));
         maxCol.setCellValueFactory(new PropertyValueFactory<>("max"));
@@ -148,33 +167,33 @@ public class DataVisualization extends Application {
         medianCol.setCellValueFactory(new PropertyValueFactory<>("median"));
         standardDeviationCol.setCellValueFactory(new PropertyValueFactory<>("standardDeviation"));
 
-        // Fix width of columns
-        provinceCol.prefWidthProperty().bind(tableView.widthProperty().multiply(0.48));
-        provinceCol.setResizable(false);
-        yearCol.prefWidthProperty().bind(tableView.widthProperty().multiply(0.23));
+        // Fix the width of the columns
+        provinceCol.prefWidthProperty().bind(databaseTable.widthProperty().multiply(0.48));
+        yearCol.prefWidthProperty().bind(databaseTable.widthProperty().multiply(0.23));
+        crimeCol.prefWidthProperty().bind(databaseTable.widthProperty().multiply(0.23));
         yearCol.setResizable(false);
-        crimeCol.prefWidthProperty().bind(tableView.widthProperty().multiply(0.23));
+        provinceCol.setResizable(false);
         crimeCol.setResizable(false);
 
-        provinceColCopy.prefWidthProperty().bind(singleTable.widthProperty().multiply(0.48));
-        provinceColCopy.setResizable(false);
-        yearColCopy.prefWidthProperty().bind(singleTable.widthProperty().multiply(0.23));
-        yearColCopy.setResizable(false);
-        crimeColCopy.prefWidthProperty().bind(singleTable.widthProperty().multiply(0.23));
-        crimeColCopy.setResizable(false);
+        provinceCol2.prefWidthProperty().bind(datapointTable.widthProperty().multiply(0.48));
+        yearCol2.prefWidthProperty().bind(datapointTable.widthProperty().multiply(0.23));
+        crimeCol2.prefWidthProperty().bind(datapointTable.widthProperty().multiply(0.23));
+        provinceCol2.setResizable(false);
+        yearCol2.setResizable(false);
+        crimeCol2.setResizable(false);
 
         // Add columns to respective table views
-        tableView.getColumns().addAll(provinceCol, yearCol, crimeCol);
-        singleTable.getColumns().addAll(provinceColCopy, yearColCopy, crimeColCopy);
+        databaseTable.getColumns().addAll(provinceCol, yearCol, crimeCol);
+        datapointTable.getColumns().addAll(provinceCol2, yearCol2, crimeCol2);
         summaryTable.getColumns().addAll(countCol, maxCol, minCol, meanCol, medianCol, standardDeviationCol);
 
         // Add padding 
-        vBox.setPadding(new Insets(10, 10, 10, 10));
-        singleTable.setPadding(new Insets(10, 10, 10, 10));
+        databaseVBox.setPadding(new Insets(10, 10, 10, 10));
+        datapointTable.setPadding(new Insets(10, 10, 10, 10));
 
         // Remove default additional column of table view
-        tableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
-        singleTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        databaseTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        datapointTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         summaryTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
 
         // Fix number of rows
@@ -182,26 +201,26 @@ public class DataVisualization extends Application {
         summaryTable.prefHeightProperty().bind(Bindings.size(summaryTable.getItems()).multiply(summaryTable.getFixedCellSize()).add(40));
 
         // Set default items to table views
-        tableView.setItems(wholeDataSet.getDataPoints());
+        databaseTable.setItems(wholeDataSet.getDataPoints());
         summaryTable.getItems().add(summaryData);
 
         // Place nodes into horizontal and vertical box
-        hBox.getChildren().addAll(filterField, filterList);
+        filterHBox.getChildren().addAll(filterField, filterList);
         HBox.setHgrow(filterField, Priority.ALWAYS);
         HBox.setHgrow(filterList, Priority.ALWAYS);
-        vBox.getChildren().addAll(hBox, tableView, summaryTable);
-        vGraph.getChildren().addAll(switchGraphs, lineChart);
-        vGraph.setAlignment(Pos.CENTER);
-        wholeScreen.getChildren().addAll(vGraph, vBox);
+        databaseVBox.getChildren().addAll(filterHBox, databaseTable, summaryTable);
+        graphVBox.getChildren().addAll(switchGraphsButton, lineChart);
+        graphVBox.setAlignment(Pos.CENTER);
+        screenHBox.getChildren().addAll(graphVBox, databaseVBox);
 
         // Configure popup stage
-        popUp.setTitle("Data value");
-        popUp.setScene(popUpScene);
+        popUpStage.setTitle("Data value");
+        popUpStage.setScene(popUpScene);
 
         // Add tooltips to graph 
         tooltip = new Tooltip("Switch grades");
-        Tooltip.install(switchGraphs, tooltip);
-        bindTooltip(switchGraphs, tooltip);
+        Tooltip.install(switchGraphsButton, tooltip);
+        bindTooltip(switchGraphsButton, tooltip);
 
         // Create list of filters
         filterList.getItems().addAll(
@@ -224,11 +243,11 @@ public class DataVisualization extends Application {
             String userSelection = filterList.getValue();
             // If the filter is empty, display all items
             if (userSelection == null || userSelection.isEmpty()) {
-                tableView.setItems(wholeDataSet.getDataPoints());
+                databaseTable.setItems(wholeDataSet.getDataPoints());
             }
             // If the filter is not empty, display a filtered list of items 
             else if (userSelection != null) {
-                tableView.setItems(wholeDataSet.search(userSelection));
+                databaseTable.setItems(wholeDataSet.search(userSelection));
             }
             // Update summary data
             summaryTable.getItems().clear();
@@ -237,15 +256,15 @@ public class DataVisualization extends Application {
         });
 
         // Detect if user double clicks a row
-        tableView.setRowFactory( table -> {
+        databaseTable.setRowFactory( table -> {
 
             TableRow<DataPoint> row = new TableRow<>();
             row.setOnMouseClicked(event -> {
                 if (event.getClickCount() == 2 && !row.isEmpty()) {
                     // Add the DataPoint in the clicked row and display stage
-                    singleTable.getItems().clear();
-                    singleTable.getItems().add(row.getItem());
-                    popUp.show();
+                    datapointTable.getItems().clear();
+                    datapointTable.getItems().add(row.getItem());
+                    popUpStage.show();
 
                 }
             });
@@ -257,11 +276,11 @@ public class DataVisualization extends Application {
         filterField.textProperty().addListener((observable, oldValue, newValue) -> {
             // If the text field is empty, display all data points
             if (newValue == null || newValue.isEmpty()) {
-                tableView.setItems(wholeDataSet.getDataPoints());
+                databaseTable.setItems(wholeDataSet.getDataPoints());
             }
             // If the text field is not empty, display the data points containing the search value 
             else {
-                tableView.setItems(wholeDataSet.search(newValue));
+                databaseTable.setItems(wholeDataSet.search(newValue));
             }
             // Update summary data
             summaryTable.getItems().clear();
@@ -270,26 +289,27 @@ public class DataVisualization extends Application {
         });
 
         // Switch graphs if button is pressed
-        switchGraphs.setOnAction(new EventHandler<ActionEvent>() {
+        switchGraphsButton.setOnAction(new EventHandler<ActionEvent>() {
 
             @Override
             public void handle(ActionEvent e) {
-                vGraph.getChildren().clear();
+                graphVBox.getChildren().clear();
                 if (isLineChart) {
-                    vGraph.getChildren().addAll(switchGraphs, pieChart);
-                    switchGraphs.setText("Crime index by province");
+                    graphVBox.getChildren().addAll(switchGraphsButton, pieChart);
+                    switchGraphsButton.setText("Crime index by province");
                 }
                 else {
-                    vGraph.getChildren().addAll(switchGraphs, lineChart);
-                    switchGraphs.setText("Year vs crime index");
+                    graphVBox.getChildren().addAll(switchGraphsButton, lineChart);
+                    switchGraphsButton.setText("Year vs crime index");
                 }
                 isLineChart = !isLineChart;
             }
 
         });
         
-        // Set scene and show primary stage
+        // Configure primary stage
         primaryStage.setScene(mainScene);
+        primaryStage.setTitle("Crime index over time");
         primaryStage.show();
 
     }
@@ -327,22 +347,13 @@ public class DataVisualization extends Application {
         
         // Declare variables
         LineChart<Integer, Double> tempLineChart;
+        NumberAxis xAxis;
+        NumberAxis yAxis;
 
         // Initialize variables
         xAxis = new NumberAxis("Year", 2010, 2019, 1);
         yAxis = new NumberAxis("Crime index", 0, 160, 15);
         tempLineChart = new LineChart(xAxis, yAxis);
-
-        bcSeries = new XYChart.Series<>();
-        abSeries = new XYChart.Series<>();
-        skSeries = new XYChart.Series<>();
-        mbSeries = new XYChart.Series<>();
-        onSeries = new XYChart.Series<>();
-        qcSeries = new XYChart.Series<>();
-        nbSeries = new XYChart.Series<>();
-        nsSeries = new XYChart.Series<>();
-        peSeries = new XYChart.Series<>();
-        nlSeries = new XYChart.Series<>();
 
         // Set names 
         bcSeries.setName("BC");
