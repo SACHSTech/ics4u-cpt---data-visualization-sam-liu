@@ -182,43 +182,47 @@ public class DataVisualization extends Application {
         yearCol2.setResizable(false);
         crimeCol2.setResizable(false);
 
-        // Add columns to respective table views
+        // Add columns to respective TableViews
         databaseTable.getColumns().addAll(provinceCol, yearCol, crimeCol);
         datapointTable.getColumns().addAll(provinceCol2, yearCol2, crimeCol2);
         summaryTable.getColumns().addAll(countCol, maxCol, minCol, meanCol, medianCol, standardDeviationCol);
 
-        // Add padding 
-        databaseVBox.setPadding(new Insets(10, 10, 10, 10));
+        // Add padding to screens
+        screenHBox.setPadding(new Insets(15, 15, 15, 15));
         datapointTable.setPadding(new Insets(10, 10, 10, 10));
 
-        // Remove default additional column of table view
+        // Remove the default additional column from the TableViews
         databaseTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         datapointTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         summaryTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
 
-        // Fix number of rows
+        // Fix the number of rows in the summaryTable
         summaryTable.setFixedCellSize(25);
         summaryTable.prefHeightProperty().bind(Bindings.size(summaryTable.getItems()).multiply(summaryTable.getFixedCellSize()).add(40));
 
-        // Set default items to table views
+        // Initially, fill the databaseTable and summaryTable with all data points
         databaseTable.setItems(wholeDataSet.getDataPoints());
         summaryTable.getItems().add(summaryData);
 
-        // Place nodes into horizontal and vertical box
+        // Place nodes into horizontal and vertical boxes
         filterHBox.getChildren().addAll(filterField, filterList);
-        HBox.setHgrow(filterField, Priority.ALWAYS);
-        HBox.setHgrow(filterList, Priority.ALWAYS);
         databaseVBox.getChildren().addAll(filterHBox, databaseTable, summaryTable);
         graphVBox.getChildren().addAll(switchGraphsButton, lineChart);
-        graphVBox.setAlignment(Pos.CENTER);
         screenHBox.getChildren().addAll(graphVBox, databaseVBox);
 
-        // Configure popup stage
+        // Set graphVBox's alignment
+        graphVBox.setAlignment(Pos.CENTER);
+
+        // Make sure the filter field and filter text take up the entire width of the screen
+        HBox.setHgrow(filterField, Priority.ALWAYS);
+        HBox.setHgrow(filterList, Priority.ALWAYS);
+
+        // Configure popUpStage
         popUpStage.setTitle("Data value");
         popUpStage.setScene(popUpScene);
 
-        // Add tooltips to graph 
-        tooltip = new Tooltip("Switch grades");
+        // Add tooltip to switchGraphsButton
+        tooltip = new Tooltip("Switch graphs");
         Tooltip.install(switchGraphsButton, tooltip);
         bindTooltip(switchGraphsButton, tooltip);
 
@@ -239,29 +243,32 @@ public class DataVisualization extends Application {
         
         // Detect if the user has clicked on a filter
         filterList.getSelectionModel().selectedItemProperty().addListener( (options, oldValue, newValue) -> {
-            // Get the filter
+            // Store filter
             String userSelection = filterList.getValue();
+
             // If the filter is empty, display all items
             if (userSelection == null || userSelection.isEmpty()) {
                 databaseTable.setItems(wholeDataSet.getDataPoints());
             }
-            // If the filter is not empty, display a filtered list of items 
+            // If the filter is not empty, display a filtered list of the data points
             else if (userSelection != null) {
                 databaseTable.setItems(wholeDataSet.search(userSelection));
             }
-            // Update summary data
+
+            // Update summary table
             summaryTable.getItems().clear();
             summaryData = summaryData.newSummary(wholeDataSet.allCrimeIndices(wholeDataSet.search(userSelection)));
             summaryTable.getItems().add(summaryData);
         });
 
-        // Detect if user double clicks a row
+        // Detect if user double clicked on a row
         databaseTable.setRowFactory( table -> {
 
             TableRow<DataPoint> row = new TableRow<>();
             row.setOnMouseClicked(event -> {
+                // Check if user clicked on a non-empty row twice
                 if (event.getClickCount() == 2 && !row.isEmpty()) {
-                    // Add the DataPoint in the clicked row and display stage
+                    // Add row item to the datapointTable and display the popUpStage
                     datapointTable.getItems().clear();
                     datapointTable.getItems().add(row.getItem());
                     popUpStage.show();
@@ -272,7 +279,7 @@ public class DataVisualization extends Application {
 
         });
 
-        // Detect if the user typed into the filter
+        // Detect if the user typed into the filter field
         filterField.textProperty().addListener((observable, oldValue, newValue) -> {
             // If the text field is empty, display all data points
             if (newValue == null || newValue.isEmpty()) {
@@ -282,26 +289,39 @@ public class DataVisualization extends Application {
             else {
                 databaseTable.setItems(wholeDataSet.search(newValue));
             }
-            // Update summary data
+
+            // Update summary table
             summaryTable.getItems().clear();
             summaryData = summaryData.newSummary(wholeDataSet.allCrimeIndices(wholeDataSet.search(newValue)));
             summaryTable.getItems().add(summaryData);
         });
 
-        // Switch graphs if button is pressed
+        // If the switchGraphsButton is pressed, switch to the other graph
         switchGraphsButton.setOnAction(new EventHandler<ActionEvent>() {
 
+            /*
+             * Switches the graph
+             * 
+             * @param event - The event
+             */
             @Override
-            public void handle(ActionEvent e) {
+            public void handle(ActionEvent event) {
+                // Clear the graphVBox
                 graphVBox.getChildren().clear();
+
+                // If the graph is a line chart, switch to the pie chart
                 if (isLineChart) {
                     graphVBox.getChildren().addAll(switchGraphsButton, pieChart);
                     switchGraphsButton.setText("Crime index by province");
                 }
+
+                // If the graph is a pie chart, switch to the line chart
                 else {
                     graphVBox.getChildren().addAll(switchGraphsButton, lineChart);
                     switchGraphsButton.setText("Year vs crime index");
                 }
+
+                // Toggle the isLineChart variable
                 isLineChart = !isLineChart;
             }
 
@@ -314,48 +334,69 @@ public class DataVisualization extends Application {
 
     }
 
+    /*
+     * Imports data from the csv file 
+     * 
+     * @return An observable list containing all the data points
+     */
     private ObservableList<DataPoint> importData() throws IOException {
         
-        BufferedReader file = new BufferedReader(new FileReader("data.csv"));
-
-        ObservableList<DataPoint> temporaryList;
+        // Declare variables
+        BufferedReader file;
+        ObservableList<DataPoint> dataList;
         String strLine;
 
-        temporaryList = FXCollections.observableArrayList();
-        // Reads first line of csv file (e.g. headings)
+        // Initialize variables
+        file = new BufferedReader(new FileReader("data.csv"));
+        dataList = FXCollections.observableArrayList();
+
+        // Reads the headings line of the csv file
         strLine = file.readLine();
 
+        // Continue reading from the file until the end of file is reached
         while (strLine != null) {
             strLine = file.readLine();
             if (strLine == null || strLine.equals("")) {
                 break;
             }
+
+            // Split the line by commas, and add the substrings into a String array
             String[] split = strLine.split(",");
             for (int i = 0; i < split.length; ++i) {
+                // Remove all quotations marks from the substrings
                 split[i] = split[i].replace("\"", "");
             }
-            temporaryList.add(new DataPoint(split[1], Integer.parseInt(split[0]), Double.parseDouble(split[2])));
+
+            // Creates a new DataPoint object and adds it to the observable list
+            dataList.add(new DataPoint(split[1], Integer.parseInt(split[0]), Double.parseDouble(split[2])));
         }
 
+        // Close the file
         file.close();
 
-        return temporaryList;
+        // Return the list of DataPoints
+        return dataList;
 
     }
 
+    /*
+     * Creates a line graph that includes all datapoints
+     * 
+     * @return The line graph as a Parent object
+     */
     public Parent createLineGraph() {
         
         // Declare variables
-        LineChart<Integer, Double> tempLineChart;
         NumberAxis xAxis;
         NumberAxis yAxis;
+        LineChart<Integer, Double> tempLineChart;
 
         // Initialize variables
         xAxis = new NumberAxis("Year", 2010, 2019, 1);
         yAxis = new NumberAxis("Crime index", 0, 160, 15);
         tempLineChart = new LineChart(xAxis, yAxis);
 
-        // Set names 
+        // Name the series
         bcSeries.setName("BC");
         abSeries.setName("AB");
         skSeries.setName("SK");
@@ -367,8 +408,8 @@ public class DataVisualization extends Application {
         peSeries.setName("PE");
         nlSeries.setName("NL");
 
-        // Add data points into graph depending on its province
-        for (DataPoint data: wholeDataSet.getDataPoints()) {
+        // Add data points into their appropriate series depending on their province
+        for (DataPoint data : wholeDataSet.getDataPoints()) {
             switch (data.getProvince()) {
                 case "British Columbia" :
                     bcSeries.getData().add(new XYChart.Data<Integer, Double>(data.getYear(), data.getCrimeIndex()));
@@ -397,22 +438,23 @@ public class DataVisualization extends Application {
                 case "Prince Edward Island" :
                     peSeries.getData().add(new XYChart.Data<Integer, Double>(data.getYear(), data.getCrimeIndex()));
                     break;
-                default:
+                default :
                     nlSeries.getData().add(new XYChart.Data<Integer, Double>(data.getYear(), data.getCrimeIndex()));
                     break;
             }
         }
 
-        // Add series into line chart
+        // Add all series into the LineChart
         tempLineChart.getData().addAll(bcSeries, abSeries, skSeries, mbSeries, onSeries, qcSeries, nbSeries, nsSeries, peSeries, nlSeries);
 
-        // Add tooltip to data points
-        for (XYChart.Series<Integer, Double> s : tempLineChart.getData()) {
-            for (XYChart.Data<Integer, Double> d : s.getData()) {
-                tooltip = new Tooltip("Province: " + s.getName() + ", Year: " + d.getXValue() + ", Crime index: " + d.getYValue());
-                Tooltip.install(d.getNode(), tooltip);
-
-                bindTooltip(d.getNode(), tooltip);
+        // Add tooltips to the data points
+        for (XYChart.Series<Integer, Double> series : tempLineChart.getData()) {
+            for (XYChart.Data<Integer, Double> data : series.getData()) {
+                // Display the province, year, and crime index of the data point
+                tooltip = new Tooltip("Province: " + series.getName() + ", Year: " + data.getXValue() + ", Crime index: " + data.getYValue());
+                
+                Tooltip.install(data.getNode(), tooltip);
+                bindTooltip(data.getNode(), tooltip);
             }
         }
 
@@ -421,8 +463,13 @@ public class DataVisualization extends Application {
 
     }
 
+    /*
+     * Create a pie chart that includes all data points
+     * 
+     * @return The pie chart in the form of a Parent object
+     */
     public Parent createPieChart() {
-        // Declare varaibles
+        // Declare variables
         String provinces[] = { "British Columbia", "Alberata", "Saskatchewan", "Manitoba", "Ontario", "Quebec", "New Brunswick", "Nova Scoita", "Prince Edward Island", "Newfoundland and Labrador" };
         double count[];
         double total;
@@ -433,9 +480,10 @@ public class DataVisualization extends Application {
         count = new double[10];
         total = 0;
         
-        // Get the total crime index for each of the provinces
-        for (DataPoint data: wholeDataSet.getDataPoints()) {
+        // Get the total crime index for each province
+        for (DataPoint data : wholeDataSet.getDataPoints()) {
             for (int i = 0; i < 10; ++i) {
+                // Increment both the province and total count
                 if (data.getProvince().equals(provinces[i])) {
                     count[i] += data.getCrimeIndex();
                     total += data.getCrimeIndex();
@@ -457,31 +505,55 @@ public class DataVisualization extends Application {
             new PieChart.Data("NL", count[9])
         );
 
+        // Create the pie chart
         pieChart = new PieChart(pieChartData);
 
-        // Add tooltip to data points
-        for (PieChart.Data data: pieChartData) {
+        // Add tooltip to all data points
+        for (PieChart.Data data : pieChartData) {
             int percentage;
-            
             percentage = (int)(100.0 * data.getPieValue() / total);
+
+            // Display the province, total crime index, and relative crime index for each data point
             tooltip = new Tooltip("Province: " + data.getName() + ", Crime index: " + Math.round(100.0 * data.getPieValue()) / 100.0 + ", " + percentage + "%");
+            
             Tooltip.install(data.getNode(), tooltip);
             bindTooltip(data.getNode(), tooltip);
         }
 
+        // Return the pie chart
         return pieChart;
 
     }
 
-    // Make the tooltip appear instantly
-    public static void bindTooltip(final Node node, final Tooltip tooltip) {
+    /*
+     * Allows Tooltip to appear instantly, instead of the built in delay
+     * 
+     * @param node - The node that the Tooltip is binded to
+     * @param tooltip - The Tooltip variable
+     */
+    public static void bindTooltip(Node node, Tooltip tooltip) {
+        // If the mouse moves on the node
         node.setOnMouseMoved(new EventHandler<MouseEvent>() {
+
+            /*
+             * Instantly show the Tooltip
+             * 
+             * @param event - The event
+             */
            @Override  
            public void handle(MouseEvent event) {
               tooltip.show(node, event.getScreenX(), event.getScreenY() + 15);
            }
         });  
+        
+        // If the mouse leaves the node
         node.setOnMouseExited(new EventHandler<MouseEvent>(){
+
+            /*
+             * Hide the tooltip
+             * 
+             * @param event - The event
+             */
            @Override
            public void handle(MouseEvent event){
               tooltip.hide();
