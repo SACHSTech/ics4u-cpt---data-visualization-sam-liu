@@ -6,7 +6,10 @@ import javafx.application.Application;
 import javafx.beans.binding.Bindings;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.collections.FXCollections;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.chart.LineChart;
@@ -19,6 +22,7 @@ import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
+import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.VBox;
@@ -30,6 +34,7 @@ public class DataVisualization extends Application {
 
     // Instance variables
     private VBox vBox;
+    private VBox vGraph;
     private HBox hBox;
     private HBox wholeScreen;
 
@@ -50,11 +55,12 @@ public class DataVisualization extends Application {
     private TableColumn<SummaryData, Double> medianCol;
     private TableColumn<SummaryData, Double> standardDeviationCol;
 
-    private LineChart<Integer, Double> lineChart;
+    private Button switchGraphs;
+    private Parent lineChart;
     private NumberAxis xAxis;
     private NumberAxis yAxis;
-    private ObservableList<XYChart.Series<Integer,Double>> lineChartData;
-    private PieChart pieChart;
+    private Parent pieChart;
+    private boolean isLineChart;
 
     private XYChart.Series<Integer, Double> bcSeries;
     private XYChart.Series<Integer, Double> abSeries;
@@ -85,6 +91,7 @@ public class DataVisualization extends Application {
 
         // Initialize variables
         vBox = new VBox(10);
+        vGraph = new VBox(10);
         hBox = new HBox(10);
         wholeScreen = new HBox(30);
 
@@ -112,6 +119,10 @@ public class DataVisualization extends Application {
         popUp = new Stage();
         mainScene = new Scene(wholeScreen);
         popUpScene = new Scene(singleTable, 410, 80);
+        switchGraphs = new Button("Year vs Crime Index");
+        lineChart = createLineGraph();
+        pieChart = createPieChart();
+        isLineChart = true;
 
         // Initialize table view columns
         provinceCol.setCellValueFactory(new PropertyValueFactory<>("province"));
@@ -171,7 +182,9 @@ public class DataVisualization extends Application {
         HBox.setHgrow(filterField, Priority.ALWAYS);
         HBox.setHgrow(filterList, Priority.ALWAYS);
         vBox.getChildren().addAll(hBox, tableView, summaryTable);
-        wholeScreen.getChildren().addAll(createLineGraph(), vBox);
+        vGraph.getChildren().addAll(switchGraphs, lineChart);
+        vGraph.setAlignment(Pos.CENTER);
+        wholeScreen.getChildren().addAll(vGraph, vBox);
 
         // Configure popup stage
         popUp.setTitle("Data value");
@@ -242,15 +255,29 @@ public class DataVisualization extends Application {
             summaryData = summaryData.newSummary(wholeDataSet.allCrimeIndices(wholeDataSet.search(newValue)));
             summaryTable.getItems().add(summaryData);
         });
+
+        // Switch graphs if button is pressed
+        switchGraphs.setOnAction(new EventHandler<ActionEvent>() {
+
+            @Override
+            public void handle(ActionEvent e) {
+                vGraph.getChildren().clear();
+                if (isLineChart) {
+                    vGraph.getChildren().addAll(switchGraphs, pieChart);
+                    switchGraphs.setText("Crime index by province");
+                }
+                else {
+                    vGraph.getChildren().addAll(switchGraphs, lineChart);
+                    switchGraphs.setText("Year vs crime index");
+                }
+                isLineChart = !isLineChart;
+            }
+
+        });
         
         // Set scene and show primary stage
         primaryStage.setScene(mainScene);
         primaryStage.show();
-
-        Scene sc = new Scene(createPieGraph());
-        Stage st = new Stage();
-        st.setScene(sc);
-        st.show();
 
     }
 
@@ -285,10 +312,13 @@ public class DataVisualization extends Application {
 
     public Parent createLineGraph() {
         
+        // Declare variables
+        LineChart<Integer, Double> tempLineChart;
+
         // Initialize variables
         xAxis = new NumberAxis("Year", 2010, 2019, 1);
         yAxis = new NumberAxis("Crime index", 0, 160, 15);
-        lineChart = new LineChart(xAxis, yAxis);
+        tempLineChart = new LineChart(xAxis, yAxis);
 
         bcSeries = new XYChart.Series<>();
         abSeries = new XYChart.Series<>();
@@ -302,7 +332,6 @@ public class DataVisualization extends Application {
         nlSeries = new XYChart.Series<>();
 
         // Set names 
-        lineChart.setTitle("Year vs Crime Index");
         bcSeries.setName("BC");
         abSeries.setName("AB");
         skSeries.setName("SK");
@@ -351,14 +380,14 @@ public class DataVisualization extends Application {
         }
 
         // Add series into line chart
-        lineChart.getData().addAll(bcSeries, abSeries, skSeries, mbSeries, onSeries, qcSeries, nbSeries, nsSeries, peSeries, nlSeries);
+        tempLineChart.getData().addAll(bcSeries, abSeries, skSeries, mbSeries, onSeries, qcSeries, nbSeries, nsSeries, peSeries, nlSeries);
 
         // Return line chart
-        return lineChart;
+        return tempLineChart;
 
     }
 
-    public Parent createPieGraph() {
+    public Parent createPieChart() {
         // Declare varaibles
         String provinces[] = { "British Columbia", "Alberata", "Saskatchewan", "Manitoba", "Ontario", "Quebec", "New Brunswick", "Nova Scoita", "Prince Edward Island", "Newfoundland and Labrador" };
         double count[];
@@ -392,7 +421,6 @@ public class DataVisualization extends Application {
         );
 
         pieChart = new PieChart(pieChartData);
-        pieChart.setTitle("Crime Index by Province");
 
         return pieChart;
 
