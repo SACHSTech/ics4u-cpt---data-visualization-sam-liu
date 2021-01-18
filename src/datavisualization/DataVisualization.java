@@ -1,6 +1,7 @@
 package datavisualization;
 
 import java.io.*;
+import java.util.*;
 
 import javafx.application.Application;
 import javafx.beans.binding.Bindings;
@@ -29,6 +30,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 
 public class DataVisualization extends Application {
 
@@ -189,6 +191,9 @@ public class DataVisualization extends Application {
         // Configure popup stage
         popUp.setTitle("Data value");
         popUp.setScene(popUpScene);
+
+        // Add tooltips to graph 
+        Tooltip.install(switchGraphs, new Tooltip("Switch graphs"));
 
         // Create list of filters
         filterList.getItems().addAll(
@@ -382,6 +387,14 @@ public class DataVisualization extends Application {
         // Add series into line chart
         tempLineChart.getData().addAll(bcSeries, abSeries, skSeries, mbSeries, onSeries, qcSeries, nbSeries, nsSeries, peSeries, nlSeries);
 
+        // Add tooltip to data points
+        for (XYChart.Series<Integer, Double> s : tempLineChart.getData()) {
+            for (XYChart.Data<Integer, Double> d : s.getData()) {
+                Tooltip.install(d.getNode(), new Tooltip(
+                        "Province: " + s.getName() + ", Year: " + d.getXValue() + ", Crime index: " + d.getYValue()));
+            }
+        }
+
         // Return line chart
         return tempLineChart;
 
@@ -391,17 +404,20 @@ public class DataVisualization extends Application {
         // Declare varaibles
         String provinces[] = { "British Columbia", "Alberata", "Saskatchewan", "Manitoba", "Ontario", "Quebec", "New Brunswick", "Nova Scoita", "Prince Edward Island", "Newfoundland and Labrador" };
         double count[];
+        double total;
         ObservableList<PieChart.Data> pieChartData;
 
         // Initialize variables
         pieChart = new PieChart();
         count = new double[10];
+        total = 0;
         
         // Get the total crime index for each of the provinces
         for (DataPoint data: wholeDataSet.getDataPoints()) {
             for (int i = 0; i < 10; ++i) {
                 if (data.getProvince().equals(provinces[i])) {
                     count[i] += data.getCrimeIndex();
+                    total += data.getCrimeIndex();
                 }
             }
         }
@@ -421,6 +437,15 @@ public class DataVisualization extends Application {
         );
 
         pieChart = new PieChart(pieChartData);
+
+        // Add tooltip to data points
+        for (PieChart.Data data: pieChartData) {
+            int percentage;
+            
+            percentage = (int)(100.0 * data.getPieValue() / total);
+            Tooltip.install(data.getNode(), new Tooltip(
+                "Province: " + data.getName() + ", Crime index: " + Math.round(100.0 * data.getPieValue()) / 100.0 + ", " + percentage + "%"));
+        }
 
         return pieChart;
 
