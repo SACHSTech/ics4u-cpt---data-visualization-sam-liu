@@ -84,7 +84,7 @@ public class DataSet {
     }
 
     /**
-     * Searches the dataPoints list for dataPoints that contain the inputted key
+     * Searches the dataPoints list for dataPoints that contain the inputted key using linear search
      * 
      * @param key - The key to search for
      * @return An observable list of datapoints containing the key
@@ -97,7 +97,7 @@ public class DataSet {
         tempList = FXCollections.observableArrayList();
         key = key.toLowerCase();
 
-        // For each dataPoint, check if the province, year, or crime index contains the inputted key
+        // Linear search
         for (DataPoint data: dataPoints) {
             if (data.getProvince().toLowerCase().contains(key)) {
                 tempList.add(data);
