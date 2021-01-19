@@ -60,6 +60,7 @@ public class DataVisualization extends Application {
     private TableColumn<SummaryData, Double> meanCol;
     private TableColumn<SummaryData, Double> medianCol;
     private TableColumn<SummaryData, Double> standardDeviationCol;
+    private TableRow<DataPoint> row;
 
     private XYChart.Series<Integer, Double> bcSeries;
     private XYChart.Series<Integer, Double> abSeries;
@@ -254,7 +255,6 @@ public class DataVisualization extends Application {
         // Detect if user double clicked on a row
         databaseTable.setRowFactory( table -> {
 
-            TableRow<DataPoint> row;
             row = new TableRow<>();
 
             row.setOnMouseClicked(event -> {
@@ -459,6 +459,7 @@ public class DataVisualization extends Application {
         double count[];
         double total;
         ObservableList<PieChart.Data> pieChartData;
+        int percentage;
 
         // Initialize variables
         pieChart = new PieChart();
@@ -495,7 +496,6 @@ public class DataVisualization extends Application {
 
         // Add tooltip to all data points
         for (PieChart.Data data : pieChartData) {
-            int percentage;
             percentage = (int)(100.0 * data.getPieValue() / total);
 
             // Display the province, total crime index, and relative crime index for each data point
