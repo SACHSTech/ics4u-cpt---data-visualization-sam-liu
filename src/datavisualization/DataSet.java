@@ -37,7 +37,7 @@ public class DataSet {
     /**
      * Setter method for dataPoints
      * 
-     * @param newList - The new list of datapoints that will be set
+     * @param newList - The new list of dataPoints 
      */
     public void setDataPoints(ObservableList<DataPoint> newList) {
         dataPoints = newList;

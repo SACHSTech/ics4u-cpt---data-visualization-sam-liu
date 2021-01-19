@@ -1,7 +1,6 @@
 package datavisualization;
 
 import java.io.*;
-
 import javafx.application.Application;
 import javafx.beans.binding.Bindings;
 import javafx.collections.FXCollections;
@@ -100,7 +99,7 @@ public class DataVisualization extends Application {
     /**
      * The method that starts the program
      * 
-     * @param primaryStage - the primary stage
+     * @param primaryStage - The primary stage
      */
     @Override
     public void start(Stage primaryStage) throws IOException {
@@ -220,7 +219,7 @@ public class DataVisualization extends Application {
         HBox.setHgrow(filterList, Priority.ALWAYS);
 
         // Configure popUpStage
-        popUpStage.setTitle("Data value");
+        popUpStage.setTitle("Data Value");
         popUpStage.setScene(popUpScene);
 
         // Add tooltip to switchGraphsButton
@@ -255,7 +254,9 @@ public class DataVisualization extends Application {
         // Detect if user double clicked on a row
         databaseTable.setRowFactory( table -> {
 
-            TableRow<DataPoint> row = new TableRow<>();
+            TableRow<DataPoint> row;
+            row = new TableRow<>();
+
             row.setOnMouseClicked(event -> {
                 // Check if user clicked on a non-empty row twice
                 if (event.getClickCount() == 2 && !row.isEmpty()) {
@@ -295,13 +296,13 @@ public class DataVisualization extends Application {
                 // If the graph is a line chart, switch to the pie chart
                 if (isLineChart) {
                     graphVBox.getChildren().addAll(switchGraphsButton, pieChart);
-                    switchGraphsButton.setText("Crime index by province");
+                    switchGraphsButton.setText("Total Crime Index By Province");
                 }
 
                 // If the graph is a pie chart, switch to the line chart
                 else {
                     graphVBox.getChildren().addAll(switchGraphsButton, lineChart);
-                    switchGraphsButton.setText("Year vs crime index");
+                    switchGraphsButton.setText("Year vs Crime Index");
                 }
 
                 // Toggle the isLineChart variable
@@ -312,7 +313,7 @@ public class DataVisualization extends Application {
         
         // Configure primary stage
         primaryStage.setScene(mainScene);
-        primaryStage.setTitle("Crime index over time");
+        primaryStage.setTitle("Crime Index Over Time");
         primaryStage.show();
 
     }
@@ -328,29 +329,30 @@ public class DataVisualization extends Application {
         BufferedReader file;
         ObservableList<DataPoint> dataList;
         String strLine;
+        String[] split;
 
         // Initialize variables
         file = new BufferedReader(new FileReader("data.csv"));
         dataList = FXCollections.observableArrayList();
 
-        // Reads the headings line of the csv file
+        // Read the heading line of the csv file
         strLine = file.readLine();
 
-        // Continue reading from the file until the end of file is reached
+        // Continue reading from the file until the end of the file is reached
         while (strLine != null) {
             strLine = file.readLine();
-            if (strLine == null || strLine.equals("")) {
+            if (strLine == null || strLine.isEmpty()) {
                 break;
             }
 
             // Split the line by commas, and add the substrings into a String array
-            String[] split = strLine.split(",");
+            split = strLine.split(",");
             for (int i = 0; i < split.length; ++i) {
                 // Remove all quotations marks from the substrings
                 split[i] = split[i].replace("\"", "");
             }
 
-            // Creates a new DataPoint object and adds it to the observable list
+            // Create a new DataPoint object and add it to the observable list
             dataList.add(new DataPoint(split[1], Integer.parseInt(split[0]), Double.parseDouble(split[2])));
         }
 
@@ -376,7 +378,7 @@ public class DataVisualization extends Application {
 
         // Initialize variables
         xAxis = new NumberAxis("Year", 2010, 2019, 1);
-        yAxis = new NumberAxis("Crime index", 0, 160, 15);
+        yAxis = new NumberAxis("Crime Index", 0, 160, 15);
         tempLineChart = new LineChart(xAxis, yAxis);
 
         // Name the series
@@ -531,7 +533,7 @@ public class DataVisualization extends Application {
         // Set the new list of data points
         databaseTable.setItems(newSet.getDataPoints());
 
-        // Update summary table
+        // Update the summary table
         summaryTable.getItems().clear();
         summaryData = new SummaryData(wholeDataSet.allCrimeIndices(newSet.getDataPoints()));
         summaryTable.getItems().add(summaryData);

@@ -152,23 +152,18 @@ public class SummaryData {
         ObservableList<Double> tempList;
 
         // Initialize variables
-        tempList = FXCollections.observableArrayList();
-
-        // Copy over the crimeIndices list
-        for (Double value: crimeIndices) {
-            tempList.add(value);
-        }
+        tempList = FXCollections.observableArrayList(crimeIndices);
         
         // Call the merge sort
         mergeSort(tempList, 0, count - 1);
     }
 
     /**
-     * Recursion sort function helper
+     * Recursive sort function helper
      * 
      * @param temporaryList - The temporary list
      * @param from - Starting index of sort
-     * @param to - End index of sort
+     * @param to - Ending index of sort
      */
     private void mergeSort(ObservableList<Double> temporaryList, int from, int to) {
         // If the size of the array is at least 1
@@ -194,40 +189,40 @@ public class SummaryData {
      */
     private void merge(ObservableList<Double> temporaryList, int from, int mid, int to) {
         // Declare variables
-        int p1;
-        int p2;
-        int p3;
+        int leftPointer;
+        int rightPointer;
+        int overallPointer;
 
         // Initialize variables
-        p1 = from;
-        p2 = mid + 1;
-        p3 = from;
+        leftPointer = from;
+        rightPointer = mid + 1;
+        overallPointer = from;
 
         // While the first pointer is less than or equal to mid and the second pointer is less than or equal to to, add the lowest value
-        while (p1 <= mid && p2 <= to) {
-            if (crimeIndices.get(p1) < crimeIndices.get(p2)) {
-                temporaryList.set(p3, crimeIndices.get(p1));
-                ++p1;
+        while (leftPointer <= mid && rightPointer <= to) {
+            if (crimeIndices.get(leftPointer) < crimeIndices.get(rightPointer)) {
+                temporaryList.set(overallPointer, crimeIndices.get(leftPointer));
+                ++leftPointer;
             }
             else {
-                temporaryList.set(p3, crimeIndices.get(p2));
-                ++p2;
+                temporaryList.set(overallPointer, crimeIndices.get(rightPointer));
+                ++rightPointer;
             }
-            ++p3;
+            ++overallPointer;
         }
 
         // Add the remaining values in [from, mid]
-        while (p1 <= mid) {
-            temporaryList.set(p3, crimeIndices.get(p1));
-            ++p1;
-            ++p3;
+        while (leftPointer <= mid) {
+            temporaryList.set(overallPointer, crimeIndices.get(leftPointer));
+            ++leftPointer;
+            ++overallPointer;
         }
 
-        // Add the remaining values in (from, to]
-        while (p2 <= to) {
-            temporaryList.set(p3, crimeIndices.get(p2));
-            ++p2;
-            ++p3;
+        // Add the remaining values in (mid, to]
+        while (rightPointer <= to) {
+            temporaryList.set(overallPointer, crimeIndices.get(rightPointer));
+            ++rightPointer;
+            ++overallPointer;
         }
 
         // Copy the sorted part of the temporary list to the crime index list
