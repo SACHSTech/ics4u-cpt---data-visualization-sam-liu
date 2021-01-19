@@ -1,5 +1,6 @@
 package datavisualization;
 
+
 /**
  * DataPoint class file
  * 

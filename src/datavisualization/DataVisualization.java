@@ -257,7 +257,7 @@ public class DataVisualization extends Application {
 
             // Update summary table
             summaryTable.getItems().clear();
-            summaryData = summaryData.newSummary(wholeDataSet.allCrimeIndices(wholeDataSet.search(userSelection)));
+            summaryData = new SummaryData(wholeDataSet.allCrimeIndices(wholeDataSet.search(userSelection)));
             summaryTable.getItems().add(summaryData);
         });
 
@@ -292,7 +292,7 @@ public class DataVisualization extends Application {
 
             // Update summary table
             summaryTable.getItems().clear();
-            summaryData = summaryData.newSummary(wholeDataSet.allCrimeIndices(wholeDataSet.search(newValue)));
+            summaryData = new SummaryData(wholeDataSet.allCrimeIndices(wholeDataSet.search(newValue)));
             summaryTable.getItems().add(summaryData);
         });
 

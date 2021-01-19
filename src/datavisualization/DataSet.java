@@ -3,48 +3,92 @@ package datavisualization;
 import javafx.collections.ObservableList;
 import javafx.collections.FXCollections;
 
+
+/**
+ * DataSet class file
+ * 
+ * @author S. Liu
+ */
 public class DataSet {
     
     // Instance variables
     private ObservableList<DataPoint> dataPoints;
     private int size;
 
-    // Constructor
+    /**
+     * Constructor - Creates a new DataSet instance
+     * 
+     * @param dataPoints - An observable list of DataPoints
+     */
     public DataSet(ObservableList<DataPoint> dataPoints) {
         this.dataPoints = dataPoints;
         this.size = dataPoints.size();
     }
 
+    /**
+     * Getter method for dataPoints
+     * 
+     * @return The datapoints list
+     */
     public ObservableList<DataPoint> getDataPoints() {
         return dataPoints;
     }
 
+    /**
+     * Getter method for size
+     * 
+     * @return The size of the dataPoints list
+     */
     public int getSize() {
         return size;
     }
 
+    /**
+     * Add a new DataPoint to the dataPoints list
+     * 
+     * @param data - The new DataPoint
+     */
     public void addData(DataPoint data) {
         dataPoints.add(data);
     }
 
-    public ObservableList<Double> allCrimeIndices(ObservableList<DataPoint> dataValues) {
-        ObservableList<Double> tempList;
+    /**
+     * Gets a list of all the crime indices in a dataPoints list
+     * 
+     * @param dataValues - The list of dataPoints
+     * @return An observable list containing all the crime indices
+     */
+    public static ObservableList<Double> allCrimeIndices(ObservableList<DataPoint> dataValues) {
+        // Declare variables
+        ObservableList<Double> indexList;
 
-        tempList = FXCollections.observableArrayList();
+        // Initialize variables
+        indexList = FXCollections.observableArrayList();
 
+        // Add the crime index of each dataPoint
         for (DataPoint data: dataValues) {
-            tempList.add(data.getCrimeIndex());
+            indexList.add(data.getCrimeIndex());
         }
 
-        return tempList;
+        // Return the list
+        return indexList;
     }
 
+    /**
+     * Searches the dataPoints list for dataPoints that contain the inputted key
+     * 
+     * @param key - The key to search for
+     * @return An observable list of datapoints containing the key
+     */
     public ObservableList<DataPoint> search(String key) {
-        key = key.toLowerCase();
+        // Declare variables
         ObservableList<DataPoint> tempList;
 
+        // Initialize variables
         tempList = FXCollections.observableArrayList();
+        key = key.toLowerCase();
 
+        // For each dataPoint, check if the province, year, or crime index contains the inputted key
         for (DataPoint data: dataPoints) {
             if (data.getProvince().toLowerCase().contains(key)) {
                 tempList.add(data);
@@ -57,6 +101,7 @@ public class DataSet {
             }
         }
 
+        // Return the list
         return tempList;
     }
 
