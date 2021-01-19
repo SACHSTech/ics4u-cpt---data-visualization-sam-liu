@@ -32,7 +32,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 
-/*
+/**
  * The main file
  * @author S. Liu
  * 
@@ -88,14 +88,14 @@ public class DataVisualization extends Application {
     private Scene mainScene;
     private Scene popUpScene;
 
-    /*
+    /**
      * The main method
      */
     public static void main(String args[]) {
         launch(args);
     }
 
-    /*
+    /**
      * The method that starts the program
      * 
      * @param primaryStage - the primary stage
@@ -299,7 +299,7 @@ public class DataVisualization extends Application {
         // If the switchGraphsButton is pressed, switch to the other graph
         switchGraphsButton.setOnAction(new EventHandler<ActionEvent>() {
 
-            /*
+            /**
              * Switches the graph
              * 
              * @param event - The event
@@ -334,7 +334,7 @@ public class DataVisualization extends Application {
 
     }
 
-    /*
+    /**
      * Imports data from the csv file 
      * 
      * @return An observable list containing all the data points
@@ -379,7 +379,7 @@ public class DataVisualization extends Application {
 
     }
 
-    /*
+    /**
      * Creates a line graph that includes all datapoints
      * 
      * @return The line graph as a Parent object
@@ -463,7 +463,7 @@ public class DataVisualization extends Application {
 
     }
 
-    /*
+    /**
      * Create a pie chart that includes all data points
      * 
      * @return The pie chart in the form of a Parent object
@@ -525,7 +525,7 @@ public class DataVisualization extends Application {
 
     }
 
-    /*
+    /**
      * Allows Tooltip to appear instantly, instead of the built in delay
      * 
      * @param node - The node that the Tooltip is binded to
@@ -535,7 +535,7 @@ public class DataVisualization extends Application {
         // If the mouse moves on the node
         node.setOnMouseMoved(new EventHandler<MouseEvent>() {
 
-            /*
+            /**
              * Instantly show the Tooltip
              * 
              * @param event - The event
@@ -549,7 +549,7 @@ public class DataVisualization extends Application {
         // If the mouse leaves the node
         node.setOnMouseExited(new EventHandler<MouseEvent>(){
 
-            /*
+            /**
              * Hide the tooltip
              * 
              * @param event - The event
