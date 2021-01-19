@@ -1,11 +1,13 @@
 
 # ICS4U - CPT: Data Interaction and Visualization
 
-Edit this page to include:
-* A description of the data set you are using
-* A link to your source for the data set.
-* Why you selected this data set for this project.
-* Embedded or link to your Demo Video
+## Data set
+It's easy to take one look at the news and think, crime has never been worse. But is this really true? In particular, how has the severity of crime changed over the past few years?
 
+This data set contains the crime index of Canada’s ten provinces over the last ten years (e.g. 2010-2019). The crime index is a number that tracks both the frequency and severity of police-reported crimes. A higher crime index corresponds to a place that either has more frequent crimes, more severe crimes, or both, relative to other places.
 
-Check the [VS Code, Java, and JavaFX Install and Set Up](https://docs.google.com/document/d/1s5oTmY8A8TDZu303p_DaH6CEAcC9xL8-aNX-pAxCcps/edit?usp=sharing) doc for set up and getting started instructions.
+Link: <a href = "https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=3510002601"> https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=3510002601
+  
+I selected this data set when I heard the news about the storming of the White House. I thought to myself, five years ago, something like this would have never happened. This got me thinking if there was a relationship between time and crime. I was also curious which Canadian province would have the highest crime index. Would it be Quebec, the home of Canada's beloved capital, Prince Edward Island, Canada's smallest province, Ontario, my home, or another province? My curiousity led me to do this project on the crime indices of all the Canadian provinces over the past ten years. 
+
+## Demo video
