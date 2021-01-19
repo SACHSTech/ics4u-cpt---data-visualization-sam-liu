@@ -20,7 +20,7 @@ public class DataPoint {
      * @param year - The year
      * @param crimeIndex - The province's crime index at the given year
      */
-    DataPoint(String province, int year, double crimeIndex) {
+    public DataPoint(String province, int year, double crimeIndex) {
         this.province = province;
         this.year = year;
         this.crimeIndex  = crimeIndex;
@@ -34,7 +34,6 @@ public class DataPoint {
     public String getProvince() {
         return province;
     }
-
 
     /**
      * Getter method for year

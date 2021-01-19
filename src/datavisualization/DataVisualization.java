@@ -83,6 +83,8 @@ public class DataVisualization extends Application {
     private SummaryData summaryData;
     private ComboBox<String> filterList;
     private TextField filterField;
+    private String optionFilter;
+    private String textFilter;
 
     private Stage popUpStage;
     private Scene mainScene;
@@ -244,21 +246,10 @@ public class DataVisualization extends Application {
         // Detect if the user has clicked on a filter
         filterList.getSelectionModel().selectedItemProperty().addListener( (options, oldValue, newValue) -> {
             // Store filter
-            String userSelection = filterList.getValue();
+            optionFilter = filterList.getValue();
 
-            // If the filter is empty, display all items
-            if (userSelection == null || userSelection.isEmpty()) {
-                databaseTable.setItems(wholeDataSet.getDataPoints());
-            }
-            // If the filter is not empty, display a filtered list of the data points
-            else if (userSelection != null) {
-                databaseTable.setItems(wholeDataSet.search(userSelection));
-            }
-
-            // Update summary table
-            summaryTable.getItems().clear();
-            summaryData = new SummaryData(wholeDataSet.allCrimeIndices(wholeDataSet.search(userSelection)));
-            summaryTable.getItems().add(summaryData);
+            // Update the dataset
+            updateDataset();
         });
 
         // Detect if user double clicked on a row
@@ -281,19 +272,11 @@ public class DataVisualization extends Application {
 
         // Detect if the user typed into the filter field
         filterField.textProperty().addListener((observable, oldValue, newValue) -> {
-            // If the text field is empty, display all data points
-            if (newValue == null || newValue.isEmpty()) {
-                databaseTable.setItems(wholeDataSet.getDataPoints());
-            }
-            // If the text field is not empty, display the data points containing the search value 
-            else {
-                databaseTable.setItems(wholeDataSet.search(newValue));
-            }
+            // Store new value
+            textFilter = newValue;
 
-            // Update summary table
-            summaryTable.getItems().clear();
-            summaryData = new SummaryData(wholeDataSet.allCrimeIndices(wholeDataSet.search(newValue)));
-            summaryTable.getItems().add(summaryData);
+            // Update the dataset
+            updateDataset();
         });
 
         // If the switchGraphsButton is pressed, switch to the other graph
@@ -384,7 +367,7 @@ public class DataVisualization extends Application {
      * 
      * @return The line graph as a Parent object
      */
-    public Parent createLineGraph() {
+    private Parent createLineGraph() {
         
         // Declare variables
         NumberAxis xAxis;
@@ -468,7 +451,7 @@ public class DataVisualization extends Application {
      * 
      * @return The pie chart in the form of a Parent object
      */
-    public Parent createPieChart() {
+    private Parent createPieChart() {
         // Declare variables
         String provinces[] = { "British Columbia", "Alberata", "Saskatchewan", "Manitoba", "Ontario", "Quebec", "New Brunswick", "Nova Scoita", "Prince Edward Island", "Newfoundland and Labrador" };
         double count[];
@@ -524,6 +507,36 @@ public class DataVisualization extends Application {
         return pieChart;
 
     }
+    
+    /**
+     * A function that updates the data displayed in the table depending on the active filters
+     */
+    private void updateDataset() {
+
+        // Declare variables
+        DataSet newSet;
+
+        // Initialize variables
+        newSet = new DataSet(FXCollections.observableArrayList(wholeDataSet.getDataPoints()));
+
+        // If a filter has been selected, update the data points
+        if (optionFilter != null && !optionFilter.isEmpty()) {
+            newSet.setDataPoints(newSet.search(optionFilter));
+        }
+
+        if (textFilter != null && !textFilter.isEmpty()) {
+            newSet.setDataPoints(newSet.search(textFilter));
+        }
+
+        // Set the new list of data points
+        databaseTable.setItems(newSet.getDataPoints());
+
+        // Update summary table
+        summaryTable.getItems().clear();
+        summaryData = new SummaryData(wholeDataSet.allCrimeIndices(newSet.getDataPoints()));
+        summaryTable.getItems().add(summaryData);
+
+    }
 
     /**
      * Allows Tooltip to appear instantly, instead of the built in delay
@@ -531,7 +544,7 @@ public class DataVisualization extends Application {
      * @param node - The node that the Tooltip is binded to
      * @param tooltip - The Tooltip variable
      */
-    public static void bindTooltip(Node node, Tooltip tooltip) {
+    private static void bindTooltip(Node node, Tooltip tooltip) {
         // If the mouse moves on the node
         node.setOnMouseMoved(new EventHandler<MouseEvent>() {
 

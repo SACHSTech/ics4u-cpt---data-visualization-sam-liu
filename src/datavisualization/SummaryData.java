@@ -33,7 +33,18 @@ public class SummaryData {
     /**
      * Computes all the summary values
      */
-    public void computeSummary() {
+    private void computeSummary() {
+        // If the list is empty, set all values to 0
+        if (crimeIndices.size() == 0) {
+            count = 0;
+            max = 0;
+            min = 0;
+            mean = 0;
+            median = 0;
+            standardDeviation = 0;
+            return;
+        }
+
         // Declare variables
         double sum;
 
