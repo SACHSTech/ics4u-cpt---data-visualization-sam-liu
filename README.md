@@ -11,3 +11,4 @@ Link: <a href = "https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=351000260
 I selected this data set when I heard the news about the storming of the White House. I thought to myself, five years ago, something like this would have never happened. This got me thinking if there was a relationship between time and crime. I was also curious which Canadian province would have the highest crime index. Would it be Quebec, the home of Canada's beloved capital, Prince Edward Island, Canada's smallest province, Ontario, my home, or another province? My curiousity led me to do this project on the crime indices of all the Canadian provinces over the past ten years. 
 
 ## Demo video
+https://www.youtube.com/watch?v=IUmXfADWyv0
