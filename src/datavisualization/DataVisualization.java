@@ -7,7 +7,6 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
-import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -18,7 +17,6 @@ import javafx.scene.chart.XYChart;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.Tab;
@@ -59,7 +57,6 @@ public class DataVisualization extends Application {
     private TableColumn<SummaryData, Double> meanCol;
     private TableColumn<SummaryData, Double> medianCol;
     private TableColumn<SummaryData, Double> standardDeviationCol;
-    private TableRow<DataPoint> row;
 
     private XYChart.Series<Integer, Double> bcSeries;
     private XYChart.Series<Integer, Double> abSeries;
@@ -218,7 +215,6 @@ public class DataVisualization extends Application {
         HBox.setHgrow(filterField, Priority.ALWAYS);
         HBox.setHgrow(filterList, Priority.ALWAYS);
 
-
         // Configure popUpStage
         popUpStage.setTitle("Data Value");
         popUpStage.setScene(popUpScene);
@@ -248,24 +244,18 @@ public class DataVisualization extends Application {
         });
 
         // Detect if user double clicked on a row
-        databaseTable.setRowFactory( table -> {
+        databaseTable.setOnMouseClicked( event -> {
+            // Check if user clicked on a non-empty row twice
+            if (event.getClickCount() == 2) {
 
-            row = new TableRow<>();
+                // Add row item to the datapointTable and display the popUpStage
+                datapointTable.getItems().clear();
+                datapointTable.getItems().add(databaseTable.getSelectionModel().getSelectedItem());
+                popUpStage.show();
 
-            row.setOnMouseClicked(event -> {
-                // Check if user clicked on a non-empty row twice
-                if (event.getClickCount() == 2 && !row.isEmpty()) {
-                    // Add row item to the datapointTable and display the popUpStage
-                    datapointTable.getItems().clear();
-                    datapointTable.getItems().add(row.getItem());
-                    popUpStage.show();
-
-                }
-            });
-            return row;
-
+            }
         });
-
+        
         // Detect if the user typed into the filter field
         filterField.textProperty().addListener((observable, oldValue, newValue) -> {
             // Store new value
@@ -421,7 +411,7 @@ public class DataVisualization extends Application {
     private Parent createPieChart() {
         // Declare variables
         PieChart tempPieChart;
-        String provinces[] = { "British Columbia", "Alberata", "Saskatchewan", "Manitoba", "Ontario", "Quebec", "New Brunswick", "Nova Scoita", "Prince Edward Island", "Newfoundland and Labrador" };
+        String provinces[] = { "British Columbia", "Alberta", "Saskatchewan", "Manitoba", "Ontario", "Quebec", "New Brunswick", "Nova Scotia", "Prince Edward Island", "Newfoundland and Labrador" };
         double count[];
         double total;
         ObservableList<PieChart.Data> pieChartData;
