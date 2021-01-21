@@ -18,8 +18,9 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
-import javafx.scene.control.TabPane;
 import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
+import javafx.scene.control.TabPane.TabClosingPolicy;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
 import javafx.scene.input.MouseEvent;
@@ -205,6 +206,7 @@ public class DataVisualization extends Application {
 
         // Configure tabPane
         tabPane.getTabs().addAll(lineChartTab, pieChartTab);
+        tabPane.setTabClosingPolicy(TabClosingPolicy.UNAVAILABLE);
 
         // Place nodes into horizontal and vertical boxes
         filterHBox.getChildren().addAll(filterField, filterList);
@@ -332,7 +334,7 @@ public class DataVisualization extends Application {
 
         // Initialize variables
         xAxis = new NumberAxis("Year", 2010, 2019, 1);
-        yAxis = new NumberAxis("Crime Index", 0, 160, 15);
+        yAxis = new NumberAxis("Crime Index", 30, 165, 15);
         tempLineChart = new LineChart(xAxis, yAxis);
         tempLineChart.setTitle("Year vs Crime Index");
 
@@ -513,7 +515,7 @@ public class DataVisualization extends Application {
              */
            @Override  
            public void handle(MouseEvent event) {
-              tooltip.show(node, event.getScreenX(), event.getScreenY() + 15);
+              tooltip.show(node, event.getScreenX(), event.getScreenY() + 10);
            }
         });  
         
