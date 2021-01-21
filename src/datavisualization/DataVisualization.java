@@ -248,7 +248,7 @@ public class DataVisualization extends Application {
         // Detect if user double clicked on a row
         databaseTable.setOnMouseClicked( event -> {
             // Check if user clicked on a non-empty row twice
-            if (event.getClickCount() == 2) {
+            if (event.getClickCount() == 2 && !databaseTable.getSelectionModel().isEmpty()) {
 
                 // Add row item to the datapointTable and display the popUpStage
                 datapointTable.getItems().clear();
