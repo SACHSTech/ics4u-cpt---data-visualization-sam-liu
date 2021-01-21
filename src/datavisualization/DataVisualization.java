@@ -5,10 +5,8 @@ import javafx.application.Application;
 import javafx.beans.binding.Bindings;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
-import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -16,12 +14,13 @@ import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.PieChart;
 import javafx.scene.chart.XYChart;
-import javafx.scene.control.Button;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
+import javafx.scene.control.TabPane.TabClosingPolicy;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
 import javafx.scene.input.MouseEvent;
@@ -40,7 +39,6 @@ public class DataVisualization extends Application {
 
     // Declare instance variables
     private VBox databaseVBox;
-    private VBox graphVBox;
     private HBox filterHBox;
     private HBox screenHBox;
 
@@ -60,7 +58,6 @@ public class DataVisualization extends Application {
     private TableColumn<SummaryData, Double> meanCol;
     private TableColumn<SummaryData, Double> medianCol;
     private TableColumn<SummaryData, Double> standardDeviationCol;
-    private TableRow<DataPoint> row;
 
     private XYChart.Series<Integer, Double> bcSeries;
     private XYChart.Series<Integer, Double> abSeries;
@@ -76,8 +73,9 @@ public class DataVisualization extends Application {
     private DataSet wholeDataSet;
     private Parent lineChart;
     private Parent pieChart;
-    private Button switchGraphsButton;
-    private boolean isLineChart;
+    private TabPane tabPane;
+    private Tab lineChartTab;
+    private Tab pieChartTab;
     private Tooltip tooltip;
 
     private SummaryData summaryData;
@@ -107,7 +105,6 @@ public class DataVisualization extends Application {
 
         // Initialize variables
         databaseVBox = new VBox(10);
-        graphVBox = new VBox(10);
         filterHBox = new HBox(10);
         screenHBox = new HBox(30);
 
@@ -142,8 +139,9 @@ public class DataVisualization extends Application {
         wholeDataSet = new DataSet(importData());
         lineChart = createLineGraph();
         pieChart = createPieChart();
-        switchGraphsButton = new Button("Year vs Crime Index");
-        isLineChart = true;
+        tabPane = new TabPane();
+        lineChartTab = new Tab("Line chart", lineChart);
+        pieChartTab = new Tab("Pie chart", pieChart);
 
         summaryData = new SummaryData(wholeDataSet.allCrimeIndices(wholeDataSet.getDataPoints()));
         filterList = new ComboBox<>();
@@ -206,14 +204,14 @@ public class DataVisualization extends Application {
         databaseTable.setItems(wholeDataSet.getDataPoints());
         summaryTable.getItems().add(summaryData);
 
+        // Configure tabPane
+        tabPane.getTabs().addAll(lineChartTab, pieChartTab);
+        tabPane.setTabClosingPolicy(TabClosingPolicy.UNAVAILABLE);
+
         // Place nodes into horizontal and vertical boxes
         filterHBox.getChildren().addAll(filterField, filterList);
         databaseVBox.getChildren().addAll(filterHBox, databaseTable, summaryTable);
-        graphVBox.getChildren().addAll(switchGraphsButton, lineChart);
-        screenHBox.getChildren().addAll(graphVBox, databaseVBox);
-
-        // Set graphVBox's alignment
-        graphVBox.setAlignment(Pos.CENTER);
+        screenHBox.getChildren().addAll(tabPane, databaseVBox);
 
         // Make sure the filter field and filter text take up the entire width of the screen
         HBox.setHgrow(filterField, Priority.ALWAYS);
@@ -222,11 +220,6 @@ public class DataVisualization extends Application {
         // Configure popUpStage
         popUpStage.setTitle("Data Value");
         popUpStage.setScene(popUpScene);
-
-        // Add tooltip to switchGraphsButton
-        tooltip = new Tooltip("Switch graphs");
-        Tooltip.install(switchGraphsButton, tooltip);
-        bindTooltip(switchGraphsButton, tooltip);
 
         // Create list of filters
         filterList.getItems().addAll(
@@ -253,24 +246,18 @@ public class DataVisualization extends Application {
         });
 
         // Detect if user double clicked on a row
-        databaseTable.setRowFactory( table -> {
+        databaseTable.setOnMouseClicked( event -> {
+            // Check if user clicked on a non-empty row twice
+            if (event.getClickCount() == 2 && !databaseTable.getSelectionModel().isEmpty()) {
 
-            row = new TableRow<>();
+                // Add row item to the datapointTable and display the popUpStage
+                datapointTable.getItems().clear();
+                datapointTable.getItems().add(databaseTable.getSelectionModel().getSelectedItem());
+                popUpStage.show();
 
-            row.setOnMouseClicked(event -> {
-                // Check if user clicked on a non-empty row twice
-                if (event.getClickCount() == 2 && !row.isEmpty()) {
-                    // Add row item to the datapointTable and display the popUpStage
-                    datapointTable.getItems().clear();
-                    datapointTable.getItems().add(row.getItem());
-                    popUpStage.show();
-
-                }
-            });
-            return row;
-
+            }
         });
-
+        
         // Detect if the user typed into the filter field
         filterField.textProperty().addListener((observable, oldValue, newValue) -> {
             // Store new value
@@ -280,37 +267,6 @@ public class DataVisualization extends Application {
             updateDataset();
         });
 
-        // If the switchGraphsButton is pressed, switch to the other graph
-        switchGraphsButton.setOnAction(new EventHandler<ActionEvent>() {
-
-            /**
-             * Switches the graph
-             * 
-             * @param event - The event
-             */
-            @Override
-            public void handle(ActionEvent event) {
-                // Clear the graphVBox
-                graphVBox.getChildren().clear();
-
-                // If the graph is a line chart, switch to the pie chart
-                if (isLineChart) {
-                    graphVBox.getChildren().addAll(switchGraphsButton, pieChart);
-                    switchGraphsButton.setText("Total Crime Index By Province");
-                }
-
-                // If the graph is a pie chart, switch to the line chart
-                else {
-                    graphVBox.getChildren().addAll(switchGraphsButton, lineChart);
-                    switchGraphsButton.setText("Year vs Crime Index");
-                }
-
-                // Toggle the isLineChart variable
-                isLineChart = !isLineChart;
-            }
-
-        });
-        
         // Configure primary stage
         primaryStage.setScene(mainScene);
         primaryStage.setTitle("Crime Index Over Time");
@@ -378,8 +334,9 @@ public class DataVisualization extends Application {
 
         // Initialize variables
         xAxis = new NumberAxis("Year", 2010, 2019, 1);
-        yAxis = new NumberAxis("Crime Index", 0, 160, 15);
+        yAxis = new NumberAxis("Crime Index", 30, 165, 15);
         tempLineChart = new LineChart(xAxis, yAxis);
+        tempLineChart.setTitle("Year vs Crime Index");
 
         // Name the series
         bcSeries.setName("BC");
@@ -455,14 +412,14 @@ public class DataVisualization extends Application {
      */
     private Parent createPieChart() {
         // Declare variables
-        String provinces[] = { "British Columbia", "Alberata", "Saskatchewan", "Manitoba", "Ontario", "Quebec", "New Brunswick", "Nova Scoita", "Prince Edward Island", "Newfoundland and Labrador" };
+        PieChart tempPieChart;
+        String provinces[] = { "British Columbia", "Alberta", "Saskatchewan", "Manitoba", "Ontario", "Quebec", "New Brunswick", "Nova Scotia", "Prince Edward Island", "Newfoundland and Labrador" };
         double count[];
         double total;
         ObservableList<PieChart.Data> pieChartData;
         int percentage;
 
         // Initialize variables
-        pieChart = new PieChart();
         count = new double[10];
         total = 0;
         
@@ -492,7 +449,8 @@ public class DataVisualization extends Application {
         );
 
         // Create the pie chart
-        pieChart = new PieChart(pieChartData);
+        tempPieChart = new PieChart(pieChartData);
+        tempPieChart.setTitle("Total Crime Index by Province");
 
         // Add tooltip to all data points
         for (PieChart.Data data : pieChartData) {
@@ -506,7 +464,7 @@ public class DataVisualization extends Application {
         }
 
         // Return the pie chart
-        return pieChart;
+        return tempPieChart;
 
     }
     
@@ -557,7 +515,7 @@ public class DataVisualization extends Application {
              */
            @Override  
            public void handle(MouseEvent event) {
-              tooltip.show(node, event.getScreenX(), event.getScreenY() + 15);
+              tooltip.show(node, event.getScreenX(), event.getScreenY() + 10);
            }
         });  
         
