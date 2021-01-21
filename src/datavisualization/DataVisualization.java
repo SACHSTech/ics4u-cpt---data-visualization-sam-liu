@@ -380,6 +380,7 @@ public class DataVisualization extends Application {
         xAxis = new NumberAxis("Year", 2010, 2019, 1);
         yAxis = new NumberAxis("Crime Index", 0, 160, 15);
         tempLineChart = new LineChart(xAxis, yAxis);
+        tempLineChart.setTitle("Year vs Crime Index");
 
         // Name the series
         bcSeries.setName("BC");
@@ -455,6 +456,7 @@ public class DataVisualization extends Application {
      */
     private Parent createPieChart() {
         // Declare variables
+        PieChart tempPieChart;
         String provinces[] = { "British Columbia", "Alberata", "Saskatchewan", "Manitoba", "Ontario", "Quebec", "New Brunswick", "Nova Scoita", "Prince Edward Island", "Newfoundland and Labrador" };
         double count[];
         double total;
@@ -462,7 +464,6 @@ public class DataVisualization extends Application {
         int percentage;
 
         // Initialize variables
-        pieChart = new PieChart();
         count = new double[10];
         total = 0;
         
@@ -492,7 +493,8 @@ public class DataVisualization extends Application {
         );
 
         // Create the pie chart
-        pieChart = new PieChart(pieChartData);
+        tempPieChart = new PieChart(pieChartData);
+        tempPieChart.setTitle("Total Crime Index by Province");
 
         // Add tooltip to all data points
         for (PieChart.Data data : pieChartData) {
@@ -506,7 +508,7 @@ public class DataVisualization extends Application {
         }
 
         // Return the pie chart
-        return pieChart;
+        return tempPieChart;
 
     }
     
