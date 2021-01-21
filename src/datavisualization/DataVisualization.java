@@ -5,7 +5,6 @@ import javafx.application.Application;
 import javafx.beans.binding.Bindings;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -16,7 +15,6 @@ import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.PieChart;
 import javafx.scene.chart.XYChart;
-import javafx.scene.control.Button;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.TableColumn;
@@ -42,7 +40,6 @@ public class DataVisualization extends Application {
 
     // Declare instance variables
     private VBox databaseVBox;
-    private VBox graphVBox;
     private HBox filterHBox;
     private HBox screenHBox;
 
@@ -78,6 +75,9 @@ public class DataVisualization extends Application {
     private DataSet wholeDataSet;
     private Parent lineChart;
     private Parent pieChart;
+    private TabPane tabPane;
+    private Tab lineChartTab;
+    private Tab pieChartTab;
     private Tooltip tooltip;
 
     private SummaryData summaryData;
@@ -107,7 +107,6 @@ public class DataVisualization extends Application {
 
         // Initialize variables
         databaseVBox = new VBox(10);
-        graphVBox = new VBox(10);
         filterHBox = new HBox(10);
         screenHBox = new HBox(30);
 
@@ -142,6 +141,9 @@ public class DataVisualization extends Application {
         wholeDataSet = new DataSet(importData());
         lineChart = createLineGraph();
         pieChart = createPieChart();
+        tabPane = new TabPane();
+        lineChartTab = new Tab("Line chart", lineChart);
+        pieChartTab = new Tab("Pie chart", pieChart);
 
         summaryData = new SummaryData(wholeDataSet.allCrimeIndices(wholeDataSet.getDataPoints()));
         filterList = new ComboBox<>();
@@ -204,18 +206,18 @@ public class DataVisualization extends Application {
         databaseTable.setItems(wholeDataSet.getDataPoints());
         summaryTable.getItems().add(summaryData);
 
+        // Configure tabPane
+        tabPane.getTabs().addAll(lineChartTab, pieChartTab);
+
         // Place nodes into horizontal and vertical boxes
         filterHBox.getChildren().addAll(filterField, filterList);
         databaseVBox.getChildren().addAll(filterHBox, databaseTable, summaryTable);
-        graphVBox.getChildren().addAll(lineChart);
-        screenHBox.getChildren().addAll(graphVBox, databaseVBox);
-
-        // Set graphVBox's alignment
-        graphVBox.setAlignment(Pos.CENTER);
+        screenHBox.getChildren().addAll(tabPane, databaseVBox);
 
         // Make sure the filter field and filter text take up the entire width of the screen
         HBox.setHgrow(filterField, Priority.ALWAYS);
         HBox.setHgrow(filterList, Priority.ALWAYS);
+
 
         // Configure popUpStage
         popUpStage.setTitle("Data Value");
