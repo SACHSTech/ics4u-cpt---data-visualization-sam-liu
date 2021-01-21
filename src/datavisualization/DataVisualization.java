@@ -22,6 +22,8 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
+import javafx.scene.control.TabPane;
+import javafx.scene.control.Tab;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
 import javafx.scene.input.MouseEvent;
@@ -76,8 +78,6 @@ public class DataVisualization extends Application {
     private DataSet wholeDataSet;
     private Parent lineChart;
     private Parent pieChart;
-    private Button switchGraphsButton;
-    private boolean isLineChart;
     private Tooltip tooltip;
 
     private SummaryData summaryData;
@@ -142,8 +142,6 @@ public class DataVisualization extends Application {
         wholeDataSet = new DataSet(importData());
         lineChart = createLineGraph();
         pieChart = createPieChart();
-        switchGraphsButton = new Button("Year vs Crime Index");
-        isLineChart = true;
 
         summaryData = new SummaryData(wholeDataSet.allCrimeIndices(wholeDataSet.getDataPoints()));
         filterList = new ComboBox<>();
@@ -209,7 +207,7 @@ public class DataVisualization extends Application {
         // Place nodes into horizontal and vertical boxes
         filterHBox.getChildren().addAll(filterField, filterList);
         databaseVBox.getChildren().addAll(filterHBox, databaseTable, summaryTable);
-        graphVBox.getChildren().addAll(switchGraphsButton, lineChart);
+        graphVBox.getChildren().addAll(lineChart);
         screenHBox.getChildren().addAll(graphVBox, databaseVBox);
 
         // Set graphVBox's alignment
@@ -222,11 +220,6 @@ public class DataVisualization extends Application {
         // Configure popUpStage
         popUpStage.setTitle("Data Value");
         popUpStage.setScene(popUpScene);
-
-        // Add tooltip to switchGraphsButton
-        tooltip = new Tooltip("Switch graphs");
-        Tooltip.install(switchGraphsButton, tooltip);
-        bindTooltip(switchGraphsButton, tooltip);
 
         // Create list of filters
         filterList.getItems().addAll(
@@ -280,37 +273,6 @@ public class DataVisualization extends Application {
             updateDataset();
         });
 
-        // If the switchGraphsButton is pressed, switch to the other graph
-        switchGraphsButton.setOnAction(new EventHandler<ActionEvent>() {
-
-            /**
-             * Switches the graph
-             * 
-             * @param event - The event
-             */
-            @Override
-            public void handle(ActionEvent event) {
-                // Clear the graphVBox
-                graphVBox.getChildren().clear();
-
-                // If the graph is a line chart, switch to the pie chart
-                if (isLineChart) {
-                    graphVBox.getChildren().addAll(switchGraphsButton, pieChart);
-                    switchGraphsButton.setText("Total Crime Index By Province");
-                }
-
-                // If the graph is a pie chart, switch to the line chart
-                else {
-                    graphVBox.getChildren().addAll(switchGraphsButton, lineChart);
-                    switchGraphsButton.setText("Year vs Crime Index");
-                }
-
-                // Toggle the isLineChart variable
-                isLineChart = !isLineChart;
-            }
-
-        });
-        
         // Configure primary stage
         primaryStage.setScene(mainScene);
         primaryStage.setTitle("Crime Index Over Time");
